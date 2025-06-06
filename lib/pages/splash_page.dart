@@ -15,7 +15,7 @@ class _SplashPageState extends State<SplashPage> {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          color: Color(0XFF5459AC),
+          color: Color(0XFF3a4b82),
         ),
         child: const Center(
           child: Text(

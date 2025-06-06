@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:haloo/pages/splash_page.dart';
+import 'package:haloo/pages/materi_page.dart';
+import 'package:haloo/widget/tabBar.dart';
+// import 'package:haloo/widget/sidebar.dart';
+// import 'package:haloo/pages/login.dart';
+// import 'package:haloo/widget/tabBar.dart';
+// import 'package:haloo/pages/splash_page.dart';
 // import 'package:haloo/pages/splash_page.dart';
 
 void main() {
@@ -33,7 +38,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: SplashPage()
+      home: MainScreen()
     );
   }
 }

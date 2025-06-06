@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-              const SizedBox(height: 180),
+              const SizedBox(height: 200),
 
               // Username TextField
               const Text('Username', style: TextStyle(
@@ -78,13 +78,13 @@ class _LoginPageState extends State<LoginPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    backgroundColor: Colors.grey[100],
+                    backgroundColor: Color(0xFFf5f2fd),
                     elevation: 0,
                   ),
                   child: const Text(
                     'Login',
                     style: TextStyle(
-                      color: Color(0xFFB547FF),
+                      color: Color(0xFF664f9f),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -117,16 +117,16 @@ class _LoginPageState extends State<LoginPage> {
 
       // Notifikasi "Success logout" di bawah
       bottomNavigationBar: Container(
-        color: const Color(0xFFACD18E), // warna hijau terang
+        color: const Color(0xFF97c15d), // warna hijau terang
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(Icons.info, color: Colors.white),
-            SizedBox(width: 8),
             Text(
               'success logout',
               style: TextStyle(color: Colors.white),
             ),
+            Icon(Icons.info, color: Colors.white),
           ],
         ),
       ),
