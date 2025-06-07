@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../models/materi_model.dart'; // Import model yang sudah ada
+import '../../models/materi_model.dart'; // Import model yang sudah ada
 
 class TambahMateriPage extends StatefulWidget {
   final bool isEdit;

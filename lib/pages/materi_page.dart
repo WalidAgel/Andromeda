@@ -1,6 +1,7 @@
 // File: pages/materi_page.dart
 import 'package:flutter/material.dart';
-import 'package:haloo/pages/form_materi.dart';
+import 'package:haloo/pages/materi/form_materi.dart';
+import 'package:haloo/pages/materi/detail_materi.dart';  // Import halaman detail
 import 'package:haloo/widget/materi_card.dart';
 import 'package:haloo/widget/sidebar.dart';
 import '../models/materi_model.dart';
@@ -54,8 +55,19 @@ class _MateriPageState extends State<MateriPage> {
             materi: materiList[index],
             onEdit: () => _editMateri(context, materiList[index]),
             onDelete: () => _deleteMateri(context, materiList[index]),
+            onDetail: () => _viewDetail(context, materiList[index]), // Tambah fungsi detail
           );
         },
+      ),
+    );
+  }
+
+  // Metode untuk navigasi ke halaman detail materi
+  void _viewDetail(BuildContext context, MateriModel materi) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailMateriPage(materi: materi),
       ),
     );
   }
@@ -129,11 +141,7 @@ class _MateriPageState extends State<MateriPage> {
   }
 
   void _editMateri(BuildContext context, MateriModel materi) {
-    // Opsi 1: Gunakan form page untuk edit
     _navigateToEditMateri(context, materi);
-    
-    // Opsi 2: Tetap gunakan dialog (kode lama)
-    // _showEditDialog(context, materi);
   }
 
   // Metode dialog edit alternatif (jika Anda masih ingin menggunakan dialog)

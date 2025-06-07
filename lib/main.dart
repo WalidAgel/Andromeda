@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:haloo/pages/materi_page.dart';
+import 'package:haloo/pages/materi/detail_materi.dart';
+// import 'package:haloo/pages/materi_page.dart';
 import 'package:haloo/widget/tabBar.dart';
 // import 'package:haloo/widget/sidebar.dart';
 // import 'package:haloo/pages/login.dart';

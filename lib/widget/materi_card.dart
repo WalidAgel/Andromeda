@@ -7,6 +7,7 @@ class MateriCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onTap;
+  final VoidCallback? onDetail; // Added this missing parameter
 
   const MateriCard({
     Key? key,
@@ -14,6 +15,7 @@ class MateriCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onTap,
+    this.onDetail, // Added to constructor
   }) : super(key: key);
 
   @override
@@ -110,7 +112,9 @@ class MateriCard extends StatelessWidget {
                   ),
                 ],
                 onSelected: (value) {
-                  if (value == 'edit' && onEdit != null) {
+                  if (value == 'lihat Detail' && onDetail != null) {
+                    onDetail!(); // Added handler for detail
+                  } else if (value == 'edit' && onEdit != null) {
                     onEdit!();
                   } else if (value == 'delete' && onDelete != null) {
                     onDelete!();
