@@ -12,18 +12,7 @@ class MateriPage extends StatefulWidget {
 }
 
 class _MateriPageState extends State<MateriPage> {
-  // Data dummy untuk materi (menggunakan List yang bisa dimodifikasi)
-  List<MateriModel> materiList = [
-    MateriModel(
-      id: '1',
-      title: 'CPU',
-      description: 'CPU, atau Central Processing Unit, adalah otak dari komputer yang bertugas memproses semua instruksi dan data. Ia bertugas sebagai pusat kontrol utama, mengarahkan operasi komputer, mulai dari menjalankan aplikasi hingga melakukan perhitungan matematis. CPU terdiri dari berbagai komponen internal, seperti unit kontrol, ALU (Arithmetical Logical Unit), dan register, yang bekerja sama untuk memproses informasi.',
-      date: '2025-04-23',
-      icon: Icons.memory,
-      iconColor: Colors.blue,
-      backgroundColor: Colors.blue[100],
-    ),
-  ];
+  List<MateriModel> materiList = [];
 
   @override
   Widget build(BuildContext context) {
