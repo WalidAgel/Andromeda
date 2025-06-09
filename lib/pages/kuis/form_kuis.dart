@@ -153,7 +153,7 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
         disabledDayTextStyle: const TextStyle(
           color: Colors.grey,
         ),
-        selectableDayPredicate: (day) => day.isAfter(DateTime.now().subtract(Duration(days: 1))),
+        selectableDayPredicate: (day) => day.isAfter(DateTime.now().subtract(const Duration(days: 1))),
       ),
       dialogSize: const Size(325, 400),
       value: _selectedDate != null ? [_selectedDate!] : [],
@@ -226,7 +226,7 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
           ? 'Kuis berhasil diperbarui!' 
           : 'Kuis berhasil ditambahkan!'),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
 
@@ -278,7 +278,7 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
           ),
           title: Text(
             widget.isEdit ? 'Edit Kuis' : 'Tambah Kuis',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -391,7 +391,7 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
                       icon: const Icon(Icons.image, size: 18),
                       label: const Text('Pilih Gambar'),
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Color(0xFF664f9f),
+                        foregroundColor: const Color(0xFF664f9f),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 10,
@@ -470,7 +470,7 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Color(0xFF664f9f),
+                      foregroundColor: const Color(0xFF664f9f),
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -496,7 +496,7 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
                           )
                         : Text(
                             widget.isEdit ? 'Update' : 'Tambah',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

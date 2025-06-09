@@ -30,7 +30,7 @@ class _MainScreenState extends State<MainScreenUser> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF664f9f), // Warna latar BottomNavigationBar
+        backgroundColor: const Color(0xFF664f9f), // Warna latar BottomNavigationBar
         selectedItemColor: Colors.white, // Warna ikon dan label saat aktif
         unselectedItemColor: Colors.white70, // Warna ikon dan label saat tidak aktif
         items: const [

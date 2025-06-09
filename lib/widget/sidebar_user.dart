@@ -88,7 +88,7 @@ class _SidebarUserState extends State<SidebarUser> {
                             height: 60,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return Icon(
+                              return const Icon(
                                 Icons.person,
                                 size: 40,
                                 color: Colors.blue,
@@ -96,13 +96,13 @@ class _SidebarUserState extends State<SidebarUser> {
                             },
                           ),
                         )
-                      : Icon(
+                      : const Icon(
                           Icons.person,
                           size: 40,
                           color: Colors.blue,
                         ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 
                 if (isLoading)
                   Column(
@@ -116,7 +116,7 @@ class _SidebarUserState extends State<SidebarUser> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Container(
                         width: 100,
                         height: 14,
@@ -133,7 +133,7 @@ class _SidebarUserState extends State<SidebarUser> {
                     children: [
                       Text(
                         'Name : ${userData?['nama_lengkap'] ?? 'User'}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -141,12 +141,12 @@ class _SidebarUserState extends State<SidebarUser> {
                       ),
                       Text(
                         'Username : ${userData?['username'] ?? 'user'}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 14,
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Role : user',
                         style: TextStyle(
                           color: Colors.white70,
@@ -161,8 +161,8 @@ class _SidebarUserState extends State<SidebarUser> {
           
           // Menu items
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Profile'),
+            leading: const Icon(Icons.person),
+            title: const Text('Profile'),
             onTap: () {
               Navigator.pop(context);
               // Navigate ke profile page jika ada
@@ -171,8 +171,8 @@ class _SidebarUserState extends State<SidebarUser> {
           ),
           
           ListTile(
-            leading: Icon(Icons.book),
-            title: Text('Materi'),
+            leading: const Icon(Icons.book),
+            title: const Text('Materi'),
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, '/materi-user');
@@ -180,19 +180,19 @@ class _SidebarUserState extends State<SidebarUser> {
           ),
           
           ListTile(
-            leading: Icon(Icons.assignment),
-            title: Text('Soal'),
+            leading: const Icon(Icons.assignment),
+            title: const Text('Soal'),
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, '/soal-user');
             },
           ),
           
-          Divider(),
+          const Divider(),
           
           ListTile(
-            leading: Icon(Icons.logout, color: Colors.red),
-            title: Text(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
               'Logout', 
               style: TextStyle(color: Colors.red),
             ),
@@ -211,17 +211,17 @@ class _SidebarUserState extends State<SidebarUser> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Konfirmasi Logout'),
-          content: Text('Apakah Anda yakin ingin logout?'),
+          title: const Text('Konfirmasi Logout'),
+          content: const Text('Apakah Anda yakin ingin logout?'),
           actions: [
             TextButton(
-              child: Text('Batal'),
+              child: const Text('Batal'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text(
+              child: const Text(
                 'Logout',
                 style: TextStyle(color: Colors.red),
               ),
@@ -242,7 +242,7 @@ class _SidebarUserState extends State<SidebarUser> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return const AlertDialog(
           content: Row(
             children: [
               CircularProgressIndicator(

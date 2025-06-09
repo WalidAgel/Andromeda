@@ -20,26 +20,26 @@ class _MateriPageState extends State<MateriPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Materi Admin', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Materi Admin', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: () => _navigateToAddMateri(context), 
           ),
         ],
       ),
-      drawer: Sidebar(),
+      drawer: const Sidebar(),
       body: ListView.builder(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         itemCount: materiList.length,
         itemBuilder: (context, index) {
           return MateriCard(
@@ -68,7 +68,7 @@ class _MateriPageState extends State<MateriPage> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TambahMateriPage(),
+        builder: (context) => const TambahMateriPage(),
       ),
     );
 
@@ -144,22 +144,22 @@ class _MateriPageState extends State<MateriPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Materi'),
+          title: const Text('Edit Materi'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Judul Materi',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: descriptionController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Deskripsi',
                     border: OutlineInputBorder(),
                   ),
@@ -170,11 +170,11 @@ class _MateriPageState extends State<MateriPage> {
           ),
           actions: [
             TextButton(
-              child: Text('Batal'),
+              child: const Text('Batal'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              child: Text('Update'),
+              child: const Text('Update'),
               onPressed: () {
                 if (titleController.text.isNotEmpty && 
                     descriptionController.text.isNotEmpty) {
@@ -185,7 +185,7 @@ class _MateriPageState extends State<MateriPage> {
                   Navigator.of(context).pop();
                   
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Materi berhasil diupdate!')),
+                    const SnackBar(content: Text('Materi berhasil diupdate!')),
                   );
                 }
               },
@@ -201,16 +201,16 @@ class _MateriPageState extends State<MateriPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Hapus Materi'),
+          title: const Text('Hapus Materi'),
           content: Text('Apakah Anda yakin ingin menghapus materi "${materi.title}"?'),
           actions: [
             TextButton(
-              child: Text('Batal'),
+              child: const Text('Batal'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: Text('Hapus'),
+              child: const Text('Hapus'),
               onPressed: () {
                 setState(() {
                   materiList.removeWhere((item) => item.id == materi.id);
@@ -218,7 +218,7 @@ class _MateriPageState extends State<MateriPage> {
                 Navigator.of(context).pop();
                 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Materi berhasil dihapus!')),
+                  const SnackBar(content: Text('Materi berhasil dihapus!')),
                 );
               },
             ),

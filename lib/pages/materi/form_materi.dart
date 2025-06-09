@@ -163,7 +163,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
           ? 'Materi berhasil diperbarui!' 
           : 'Materi berhasil ditambahkan!'),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
 
@@ -215,7 +215,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
           ),
           title: Text(
             widget.isEdit ? 'Edit Materi' : 'Tambah Materi',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -317,7 +317,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                       icon: const Icon(Icons.image, size: 18),
                       label: const Text('Pilih Gambar'),
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Color(0xFF664f9f),
+                        foregroundColor: const Color(0xFF664f9f),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 10,
@@ -396,7 +396,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Color(0xFF664f9f),
+                      foregroundColor: const Color(0xFF664f9f),
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -422,7 +422,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                           )
                         : Text(
                             widget.isEdit ? 'Update' : 'Tambah',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

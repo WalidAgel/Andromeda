@@ -18,13 +18,13 @@ class SoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             // Icon container dengan design yang lebih menarik
@@ -45,7 +45,7 @@ class SoalCard extends StatelessWidget {
                 size: 24,
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +53,7 @@ class SoalCard extends StatelessWidget {
                   // Judul pertanyaan
                   Text(
                     soal.title.isNotEmpty ? soal.title : 'Soal Baru',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
@@ -62,10 +62,10 @@ class SoalCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   // Jenis soal dengan styling yang lebih baik
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: Colors.blue[50],
                       borderRadius: BorderRadius.circular(4),
@@ -79,7 +79,7 @@ class SoalCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   // Tanggal dengan format yang lebih baik
                   Row(
                     children: [
@@ -88,7 +88,7 @@ class SoalCard extends StatelessWidget {
                         size: 12,
                         color: Colors.grey[500],
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         soal.date.isNotEmpty ? soal.date : _getCurrentDate(),
                         style: TextStyle(
@@ -157,7 +157,7 @@ class SoalCard extends StatelessWidget {
                   ),
                 ],
                 child: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: Icon(
                     Icons.more_vert,
                     color: Colors.grey[600],

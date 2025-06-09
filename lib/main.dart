@@ -4,9 +4,7 @@ import 'pages/splash_page.dart';
 import 'pages/login.dart';
 import 'pages/register_page.dart';
 import 'pages/user_choice_page.dart';
-import 'pages/materi_page.dart';
 import 'pages/materi_user.dart';
-import 'pages/soal_page.dart';
 import 'pages/soal_user.dart';
 import 'widget/tabBar.dart';
 

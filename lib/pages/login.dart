@@ -14,10 +14,10 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _isLoading = false;
-  bool _isAdminLogin = false;
+  final bool _isAdminLogin = false;
   String? _errorMessage;
   bool _showLogoutSuccess = false;
 
@@ -68,34 +68,35 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final username = _usernameController.text.trim();
       final password = _passwordController.text;
-      
-      ApiResponse response;
-      
-      if (_isAdminLogin) {
-        response = await ApiService.loginAdmin(
-          username: username,
-          password: password,
-        );
-      } else {
-        response = await ApiService.loginUser(
-          username: username,
-          password: password,
-        );
-      }
-      
+
+      // Coba login sebagai admin dulu
+      ApiResponse response = await ApiService.loginAdmin(
+        username: username,
+        password: password,
+      );
+
       if (response.success) {
-        // Login berhasil, navigate berdasarkan user type
-        if (_isAdminLogin) {
-          Navigator.pushReplacementNamed(context, '/admin-dashboard');
-        } else {
-          Navigator.pushReplacementNamed(context, '/user-choice');
-        }
-      } else {
-        setState(() {
-          _errorMessage = response.message;
-        });
+        // Jika berhasil login sebagai admin
+        Navigator.pushReplacementNamed(context, '/admin-dashboard');
+        return;
       }
-      
+
+      // Jika gagal, coba login sebagai user
+      response = await ApiService.loginUser(
+        username: username,
+        password: password,
+      );
+
+      if (response.success) {
+        // Jika berhasil login sebagai user
+        Navigator.pushReplacementNamed(context, '/user-choice');
+        return;
+      }
+
+      // Jika keduanya gagal
+      setState(() {
+        _errorMessage = response.message;
+      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
@@ -217,7 +218,9 @@ class _LoginPageState extends State<LoginPage> {
                         contentPadding: const EdgeInsets.symmetric(vertical: 8),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             color: Colors.grey,
                             size: 20,
                           ),
@@ -259,7 +262,8 @@ class _LoginPageState extends State<LoginPage> {
                                   width: 16,
                                   height: 16,
                                   child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
                                     strokeWidth: 2,
                                   ),
                                 )
@@ -310,7 +314,8 @@ class _LoginPageState extends State<LoginPage> {
               right: 0,
               child: Container(
                 color: const Color(0xFF97C93D),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     const Text(

@@ -82,7 +82,7 @@ class KuisCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Icon(
+                    const Icon(
                       Icons.calendar_today,
                       size: 12,
                       color: Colors.blue,

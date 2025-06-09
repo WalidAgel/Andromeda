@@ -40,7 +40,7 @@ class _KuisPageState extends State<KuisPage> {
           ),
         ],
       ),
-      drawer: Sidebar(),
+      drawer: const Sidebar(),
       body: kuisList.isEmpty
           ? Center(
               child: Column(
@@ -101,7 +101,7 @@ class _KuisPageState extends State<KuisPage> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TambahKuisPage(),
+        builder: (context) => const TambahKuisPage(),
       ),
     );
 

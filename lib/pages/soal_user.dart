@@ -120,7 +120,7 @@ class _SoalUserState extends State<SoalUser> {
       return 'Soal latihan untuk mengukur pemahaman materi.';
     }
     if (pertanyaan.length > 100) {
-      return pertanyaan.substring(0, 100) + '...';
+      return '${pertanyaan.substring(0, 100)}...';
     }
     return pertanyaan;
   }

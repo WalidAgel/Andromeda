@@ -350,7 +350,7 @@ class _MateriUserState extends State<MateriUser> {
                       const SizedBox(width: 4),
                       Text(
                         materi.date,
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       const Spacer(),
                       Container(

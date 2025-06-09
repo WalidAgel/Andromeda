@@ -22,12 +22,12 @@ class MateriCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -37,12 +37,12 @@ class MateriCard extends StatelessWidget {
                   children: [
                     Text(
                       materi.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       materi.description,
                       style: TextStyle(
@@ -52,7 +52,7 @@ class MateriCard extends StatelessWidget {
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       materi.date,
                       style: TextStyle(
@@ -63,12 +63,12 @@ class MateriCard extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Container(
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: materi.backgroundColor ?? Color(0xFF664f9f),
+                  color: materi.backgroundColor ?? const Color(0xFF664f9f),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -78,9 +78,9 @@ class MateriCard extends StatelessWidget {
                 ),
               ),
               PopupMenuButton(
-                icon: Icon(Icons.more_vert),
+                icon: const Icon(Icons.more_vert),
                 itemBuilder: (context) => [
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'lihat Detail',
                     child: Row(
                       children: [
@@ -90,7 +90,7 @@ class MateriCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
@@ -100,7 +100,7 @@ class MateriCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [

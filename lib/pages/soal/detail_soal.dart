@@ -17,10 +17,10 @@ class DetailSoalPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Detail Soal',
           style: TextStyle(
             color: Colors.black,
@@ -31,7 +31,7 @@ class DetailSoalPage extends StatelessWidget {
         centerTitle: false,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -42,7 +42,7 @@ class DetailSoalPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
-                padding: EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -91,11 +91,11 @@ class DetailSoalPage extends StatelessWidget {
                                   child: Container(
                                     width: 16,
                                     height: 16,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.black54,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.zoom_in,
                                       size: 10,
                                       color: Colors.white,
@@ -106,7 +106,7 @@ class DetailSoalPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         // Kategori sebagai "judul"
                         Expanded(
                           child: Column(
@@ -114,13 +114,13 @@ class DetailSoalPage extends StatelessWidget {
                             children: [
                               Text(
                                 soal['kategori'] ?? 'Komputer Komprehensif',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
                                 'Jenis Kuis',
                                 style: TextStyle(
@@ -135,12 +135,12 @@ class DetailSoalPage extends StatelessWidget {
                       ],
                     ),
                     
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       soal['pertanyaan'] ?? '',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
@@ -150,7 +150,7 @@ class DetailSoalPage extends StatelessWidget {
                       textAlign: TextAlign.justify,
                     ),
                     
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     
                     if (soal['opsiA'] != null) ...[
                       _buildOpsiJawaban('A', soal['opsiA']),
@@ -159,7 +159,7 @@ class DetailSoalPage extends StatelessWidget {
                       _buildOpsiJawaban('D', soal['opsiD']),
                     ],
                   
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     
                     // Tanggal pembuatan
                     Text(
@@ -175,7 +175,7 @@ class DetailSoalPage extends StatelessWidget {
               ),
             ),
             
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -183,13 +183,13 @@ class DetailSoalPage extends StatelessWidget {
   }
   
   Widget _buildOpsiJawaban(String opsi, String? jawaban) {
-    if (jawaban == null || jawaban.isEmpty) return SizedBox();
+    if (jawaban == null || jawaban.isEmpty) return const SizedBox();
     
     return Padding(
-      padding: EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         'Opsi $opsi: $jawaban',
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 14,
           color: Colors.black87,
           height: 1.4,
@@ -348,10 +348,10 @@ class DetailSoalPage extends StatelessWidget {
               children: [
                 // Header dialog
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey[50],
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
                     ),
@@ -361,8 +361,8 @@ class DetailSoalPage extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close),
-                        constraints: BoxConstraints(),
+                        icon: const Icon(Icons.close),
+                        constraints: const BoxConstraints(),
                         padding: EdgeInsets.zero,
                       ),
                     ],
@@ -371,7 +371,7 @@ class DetailSoalPage extends StatelessWidget {
                 // Gambar besar
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.all(16),
+                    margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,

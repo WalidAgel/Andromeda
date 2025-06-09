@@ -78,7 +78,7 @@ class _SplashPageState extends State<SplashPage>
           child: Center(
             child: FadeTransition(
               opacity: _fadeAnimation,
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Icon pesawat
@@ -87,9 +87,9 @@ class _SplashPageState extends State<SplashPage>
                     color: Colors.white,
                     size: 24,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   // Text Andromeda
-                  const Text(
+                  Text(
                     'Andromeda',
                     style: TextStyle(
                       color: Colors.white,

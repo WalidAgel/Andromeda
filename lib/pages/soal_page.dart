@@ -39,7 +39,7 @@ class _SoalPageState extends State<SoalPage> {
           ),
         ],
       ),
-      drawer: Sidebar(),
+      drawer: const Sidebar(),
       body: soalList.isEmpty 
         ? const Center(
             child: Column(
@@ -107,7 +107,7 @@ class _SoalPageState extends State<SoalPage> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TambahSoalPage(),
+        builder: (context) => const TambahSoalPage(),
       ),
     );
 

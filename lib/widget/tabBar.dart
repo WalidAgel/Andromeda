@@ -15,9 +15,9 @@ class _MainScreenState extends State<MainScreen> {
 
   // List halaman yang akan ditampilkan
   final List<Widget> _pages = [
-    MateriPage(),
-    KuisPage(),
-    SoalPage(),
+    const MateriPage(),
+    const KuisPage(),
+    const SoalPage(),
   ];
 
   void _onItemTapped(int index) {

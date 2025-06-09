@@ -122,7 +122,7 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
         _opsiCController.text.isEmpty ||
         _opsiDController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Mohon lengkapi semua field'),
           backgroundColor: Colors.red,
         ),
@@ -154,10 +154,10 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Tambah Soal',
           style: TextStyle(
             color: Colors.black,
@@ -168,34 +168,34 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
         centerTitle: false,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Field Pertanyaan
             _buildSimpleTextField('Pertanyaan', _pertanyaanController),
             
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Field Opsi A
             _buildSimpleTextField('Opsi A', _opsiAController),
             
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Field Opsi B
             _buildSimpleTextField('Opsi B', _opsiBController),
             
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Field Opsi C
             _buildSimpleTextField('Opsi C', _opsiCController),
             
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Field Opsi D
             _buildSimpleTextField('Opsi D', _opsiDController),
 
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
 
             // Section Gambar Kuis
             const Text(
@@ -216,7 +216,7 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
                   icon: const Icon(Icons.image, size: 18),
                   label: const Text('Pilih Gambar'),
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Color(0xFF664f9f),
+                    foregroundColor: const Color(0xFF664f9f),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 10,
@@ -286,7 +286,7 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
               ],
             ),
             
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
 
             // Tombol Tambah
             SizedBox(
@@ -295,13 +295,13 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
                 onPressed: _simpanSoal,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   elevation: 0,
                 ),
-                child: Text(
+                child: const Text(
                   'Tambah',
                   style: TextStyle(
                     color: Colors.white,
@@ -323,13 +323,13 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         TextField(
           controller: controller,
           decoration: InputDecoration(
@@ -339,10 +339,10 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.grey[300]!),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.deepPurple, width: 2),
             ),
-            contentPadding: EdgeInsets.symmetric(vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(vertical: 8),
           ),
         ),
       ],

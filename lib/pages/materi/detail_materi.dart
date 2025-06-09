@@ -17,10 +17,10 @@ class DetailMateriPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Detail Materi',
           style: TextStyle(
             color: Colors.black,
@@ -31,7 +31,7 @@ class DetailMateriPage extends StatelessWidget {
         centerTitle: false,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -42,7 +42,7 @@ class DetailMateriPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
-                padding: EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -76,11 +76,11 @@ class DetailMateriPage extends StatelessWidget {
                                   child: Container(
                                     width: 16,
                                     height: 16,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.black54,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.zoom_in,
                                       size: 10,
                                       color: Colors.white,
@@ -91,7 +91,7 @@ class DetailMateriPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         // Judul
                         Expanded(
                           child: Column(
@@ -99,25 +99,25 @@ class DetailMateriPage extends StatelessWidget {
                             children: [
                               Text(
                                 materi.title, // Use dynamic title
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                             ],
                           ),
                         ),
                       ],
                     ),
                     
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     
                     // Deskripsi materi
                     Text(
                       materi.description, // Use dynamic description
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black87,
                         height: 1.6,
@@ -126,7 +126,7 @@ class DetailMateriPage extends StatelessWidget {
                       textAlign: TextAlign.justify,
                     ),
                     
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     
                     // Tanggal pembuatan
                     Text(
@@ -142,7 +142,7 @@ class DetailMateriPage extends StatelessWidget {
               ),
             ),
             
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -168,10 +168,10 @@ class DetailMateriPage extends StatelessWidget {
               children: [
                 // Header dialog
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey[50],
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
                     ),
@@ -181,8 +181,8 @@ class DetailMateriPage extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close),
-                        constraints: BoxConstraints(),
+                        icon: const Icon(Icons.close),
+                        constraints: const BoxConstraints(),
                         padding: EdgeInsets.zero,
                       ),
                     ],
@@ -191,7 +191,7 @@ class DetailMateriPage extends StatelessWidget {
                 // Gambar besar
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.all(16),
+                    margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: materi.backgroundColor ?? Colors.orange[300], // Use dynamic color
                       borderRadius: BorderRadius.circular(12),

@@ -143,15 +143,15 @@ class _RegisterPageState extends State<RegisterPage>
             Navigator.pop(context);
           },
         ),
-        title: Row(
+        title: const Row(
           children: [
             Icon(
               Icons.flight,
-              color: const Color(0xFF3a4b82),
+              color: Color(0xFF3a4b82),
               size: 24,
             ),
-            const SizedBox(width: 8),
-            const Text(
+            SizedBox(width: 8),
+            Text(
               'Andromeda',
               style: TextStyle(
                 fontSize: 20,

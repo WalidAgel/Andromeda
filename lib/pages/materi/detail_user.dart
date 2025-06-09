@@ -17,10 +17,10 @@ class DetailUser extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Detail Materi',
           style: TextStyle(
             color: Colors.black,
@@ -31,7 +31,7 @@ class DetailUser extends StatelessWidget {
         centerTitle: false,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -42,7 +42,7 @@ class DetailUser extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
-                padding: EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -76,11 +76,11 @@ class DetailUser extends StatelessWidget {
                                   child: Container(
                                     width: 16,
                                     height: 16,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.black54,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.zoom_in,
                                       size: 10,
                                       color: Colors.white,
@@ -92,12 +92,12 @@ class DetailUser extends StatelessWidget {
                           ),
                         ),
                         
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         
                         // Judul
                         Text(
                           materi.title, // Use dynamic title
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
@@ -106,12 +106,12 @@ class DetailUser extends StatelessWidget {
                       ],
                     ),
                     
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     
                     // Deskripsi materi
                     Text(
                       materi.description, // Use dynamic description
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black87,
                         height: 1.5,
@@ -120,7 +120,7 @@ class DetailUser extends StatelessWidget {
                       textAlign: TextAlign.justify,
                     ),
                     
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     
                     // Tanggal pembuatan
                     Text(
@@ -136,7 +136,7 @@ class DetailUser extends StatelessWidget {
               ),
             ),
             
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -162,10 +162,10 @@ class DetailUser extends StatelessWidget {
               children: [
                 // Header dialog
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey[50],
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
                     ),
@@ -175,8 +175,8 @@ class DetailUser extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.close),
-                        constraints: BoxConstraints(),
+                        icon: const Icon(Icons.close),
+                        constraints: const BoxConstraints(),
                         padding: EdgeInsets.zero,
                       ),
                     ],
@@ -185,7 +185,7 @@ class DetailUser extends StatelessWidget {
                 // Gambar besar
                 Expanded(
                   child: Container(
-                    margin: EdgeInsets.all(16),
+                    margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: materi.backgroundColor ?? Colors.orange[300], // Use dynamic color
                       borderRadius: BorderRadius.circular(12),
