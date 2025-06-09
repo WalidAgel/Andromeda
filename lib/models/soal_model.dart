@@ -9,7 +9,7 @@ class SoalModel {
   final IconData icon;
   final Color iconColor;
   final Color backgroundColor;
-  final Map<String, dynamic>? questionData; // Field ini penting untuk menyimpan data lengkap soal
+  final Map<String, dynamic>? questionData;
 
   SoalModel({
     required this.id,
@@ -23,7 +23,7 @@ class SoalModel {
     this.questionData,
   });
 
-  // Factory constructor untuk membuat dari Map
+  // Factory constructor from Map
   factory SoalModel.fromMap(Map<String, dynamic> map) {
     return SoalModel(
       id: map['id'] ?? '',
@@ -31,14 +31,14 @@ class SoalModel {
       description: map['description'] ?? '',
       category: map['category'] ?? '',
       date: map['date'] ?? '',
-      icon: Icons.quiz,
-      iconColor: Colors.blue,
-      backgroundColor: Colors.blue.shade100,
+      icon: _getIconFromString(map['icon']),
+      iconColor: _getColorFromString(map['iconColor']) ?? Colors.white,
+      backgroundColor: _getColorFromString(map['backgroundColor']) ?? Colors.blue,
       questionData: map['questionData'],
     );
   }
 
-  // Method untuk convert ke Map
+  // Convert to Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -50,7 +50,7 @@ class SoalModel {
     };
   }
 
-  // Copy with method untuk update
+  // Copy with method
   SoalModel copyWith({
     String? id,
     String? title,
@@ -73,5 +73,41 @@ class SoalModel {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       questionData: questionData ?? this.questionData,
     );
+  }
+
+  // Helper method to get IconData from string
+  static IconData _getIconFromString(String? iconName) {
+    switch (iconName) {
+      case 'memory':
+        return Icons.memory;
+      case 'storage':
+        return Icons.storage;
+      case 'book':
+        return Icons.book;
+      case 'code':
+        return Icons.code;
+      default:
+        return Icons.assignment;
+    }
+  }
+
+  // Helper method to get Color from string
+  static Color? _getColorFromString(String? colorName) {
+    switch (colorName) {
+      case 'purple':
+        return Colors.purple.shade300;
+      case 'blue':
+        return Colors.blue.shade300;
+      case 'orange':
+        return Colors.orange.shade300;
+      case 'green':
+        return Colors.green.shade300;
+      case 'red':
+        return Colors.red.shade300;
+      case 'white':
+        return Colors.white;
+      default:
+        return null;
+    }
   }
 }
