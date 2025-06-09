@@ -114,17 +114,19 @@ class _SplashPageState extends State<SplashPage>
           child: Center(
             child: FadeTransition(
               opacity: _fadeAnimation,
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Icon pesawat
-                  Icon(
-                    Icons.flight,
-                    color: Colors.white,
-                    size: 24,
+                  // Icon pesawat yang di-rotate ke kanan (90 derajat = pi/2)
+                  Transform.rotate(
+                    angle: 1.5708, // pi/2 radian = 90 derajat ke kanan
+                    child: Icon(
+                      Icons.flight,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                   SizedBox(width: 8),
-                  // Text Andromeda
                   Text(
                     'Andromeda',
                     style: TextStyle(

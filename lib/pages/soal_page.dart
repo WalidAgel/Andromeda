@@ -14,6 +14,8 @@ class SoalPage extends StatefulWidget {
 
 class SoalPageState extends State<SoalPage> {
   List<Map<String, dynamic>> soalList = [];
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
@@ -22,12 +24,35 @@ class SoalPageState extends State<SoalPage> {
   }
 
   Future<void> fetchSoalList() async {
-    final data = await ApiService.getSoalList();
-    if (mounted) {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final response = await ApiService.getSoal();
+      if (response.success && response.data != null) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        setState(() {
+          soalList = data.cast<Map<String, dynamic>>();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = response.message;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        soalList = List<Map<String, dynamic>>.from(data);
+        errorMessage = 'Terjadi kesalahan: $e';
+        isLoading = false;
       });
     }
+  }
+
+  Future<void> _refreshData() async {
+    await fetchSoalList();
   }
 
   @override
@@ -47,48 +72,145 @@ class SoalPageState extends State<SoalPage> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _refreshData,
+            tooltip: 'Refresh Data',
+          ),
+          IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _navigateToAddSoal(context),
           ),
         ],
       ),
       drawer: const Sidebar(),
-      body: soalList.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.quiz_outlined, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text(
-                    'Belum ada soal',
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Tap tombol + untuk menambah soal',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              'Memuat data soal...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: soalList.length,
-              itemBuilder: (context, index) {
-                final soal = soalList[index];
-                return SoalCard(
-                  idSoal: soal['id'],
-                  data: soal,
-                  onEdit: () => _navigateToEditSoal(context, soal),
-                  onDelete: () => _deleteSoal(context, soal),
-                  onDetail: () => _viewDetail(context, soal),
-                );
-              },
             ),
+          ],
+        ),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red[300],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Gagal memuat data',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.red[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                errorMessage!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _refreshData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Coba Lagi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (soalList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.quiz_outlined,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Belum ada soal',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Tap tombol + untuk menambah soal',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _navigateToAddSoal(context),
+              icon: const Icon(Icons.add),
+              label: const Text('Tambah Soal'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _refreshData,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: soalList.length,
+        itemBuilder: (context, index) {
+          final soal = soalList[index];
+          return SoalCard(
+            idSoal: soal['id'],
+            data: soal,
+            onEdit: () => _navigateToEditSoal(context, soal),
+            onDelete: () => _deleteSoal(context, soal),
+            onDetail: () => _viewDetail(context, soal),
+          );
+        },
+      ),
     );
   }
 
@@ -105,6 +227,8 @@ class SoalPageState extends State<SoalPage> {
       _editSoal(context, soal);
     } else if (result == 'delete') {
       _deleteSoalFromDetail(soal);
+    } else if (result == 'refresh') {
+      _refreshData();
     }
   }
 
@@ -122,20 +246,56 @@ class SoalPageState extends State<SoalPage> {
   }
 
   void _addNewSoal(Map<String, dynamic> soalData) async {
-    await ApiService.addSoal(soalData);
-    await fetchSoalList();
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Soal berhasil ditambahkan!'),
-        backgroundColor: Colors.green,
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
+
+    try {
+      final response = await ApiService.addSoal(soalData);
+      
+      Navigator.pop(context); // Close loading
+
+      if (response.success) {
+        await fetchSoalList();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Soal berhasil ditambahkan!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal menambah soal: ${response.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close loading
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _navigateToEditSoal(
-      BuildContext context, Map<String, dynamic> soal) async {
+  void _navigateToEditSoal(BuildContext context, Map<String, dynamic> soal) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -152,16 +312,53 @@ class SoalPageState extends State<SoalPage> {
   }
 
   void _updateSoal(String id, Map<String, dynamic> updatedData) async {
-    await ApiService.updateSoal(id, updatedData);
-    await fetchSoalList();
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Soal berhasil diperbarui!'),
-        backgroundColor: Colors.green,
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
+
+    try {
+      final response = await ApiService.updateSoal(id, updatedData);
+      
+      Navigator.pop(context); // Close loading
+
+      if (response.success) {
+        await fetchSoalList();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Soal berhasil diperbarui!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal memperbarui soal: ${response.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close loading
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _editSoal(BuildContext context, Map<String, dynamic> soal) {
@@ -169,16 +366,53 @@ class SoalPageState extends State<SoalPage> {
   }
 
   void _deleteSoalFromDetail(Map<String, dynamic> soal) async {
-    await ApiService.deleteSoal(soal['id'].toString());
-    await fetchSoalList();
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Soal berhasil dihapus!'),
-        backgroundColor: Colors.red,
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
+
+    try {
+      final response = await ApiService.deleteSoal(soal['id'].toString());
+      
+      Navigator.pop(context); // Close loading
+
+      if (response.success) {
+        await fetchSoalList();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Soal berhasil dihapus!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal menghapus soal: ${response.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close loading
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _deleteSoal(BuildContext context, Map<String, dynamic> soal) {
@@ -201,17 +435,8 @@ class SoalPageState extends State<SoalPage> {
               ),
               child: const Text('Hapus'),
               onPressed: () async {
-                await ApiService.deleteSoal(soal['id'].toString());
-                if (mounted) {
-                  Navigator.of(dialogContext).pop();
-                  await fetchSoalList();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Soal berhasil dihapus!'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+                Navigator.of(dialogContext).pop();
+                _deleteSoalFromDetail(soal);
               },
             ),
           ],

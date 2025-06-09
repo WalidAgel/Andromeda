@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'dart:io';
-import '../../models/kuis_model.dart'; // Import model yang sudah ada
 
 class TambahKuisPage extends StatefulWidget {
   final bool isEdit;
-  final KuisModel? existingKuis;
+  final Map<String, dynamic>? existingKuis;
   
   const TambahKuisPage({
     super.key,
@@ -26,16 +25,36 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
   DateTime? _selectedDate;
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
+  
+  // Sample questions for demo
+  List<Map<String, dynamic>> availableQuestions = [
+    {
+      'id': 1,
+      'question': 'Apa kegunaan setState() di Flutter?',
+      'selected': false,
+    },
+    {
+      'id': 2,
+      'question': 'Apa itu Flutter?',
+      'selected': false,
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
-    // Jika mode edit, isi form dengan data yang ada
     if (widget.isEdit && widget.existingKuis != null) {
-      _judulController.text = widget.existingKuis!.title;
-      // Parse tanggal deadline jika ada
+      _loadExistingData();
+    }
+  }
+
+  void _loadExistingData() {
+    final data = widget.existingKuis!;
+    _judulController.text = data['nama_kuis'] ?? '';
+    
+    if (data['deadline'] != null) {
       try {
-        _selectedDate = DateTime.parse(widget.existingKuis!.tanggalDeadline);
+        _selectedDate = DateTime.parse(data['deadline']);
       } catch (e) {
         print('Error parsing date: $e');
       }
@@ -48,10 +67,42 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _showImageSourceDialog() async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pilih Sumber Gambar'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galeri'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Kamera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 1024,
         maxHeight: 1024,
         imageQuality: 85,
@@ -72,62 +123,6 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
     }
   }
 
-  Future<void> _showImageSourceDialog() async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pilih Sumber Gambar'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImageFromCamera();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-      
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error mengambil foto: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   void _removeImage() {
     setState(() {
       _selectedImage = null;
@@ -139,7 +134,7 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
       context: context,
       config: CalendarDatePicker2WithActionButtonsConfig(
         calendarType: CalendarDatePicker2Type.single,
-        selectedDayHighlightColor: const Color(0xFF664f9f),
+        selectedDayHighlightColor: Colors.purple,
         closeDialogOnCancelTapped: true,
         firstDayOfWeek: 1,
         selectedDayTextStyle: const TextStyle(
@@ -167,17 +162,11 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
     }
   }
 
-  String _formatDate(DateTime date) {
-    const List<String> months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  String _formatDateForDisplay(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  // Fungsi untuk mengkonversi DateTime ke format YYYY-MM-DD
-  String _formatDateForDeadline(DateTime date) {
+  String _formatDateForApi(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
@@ -186,296 +175,340 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
       return;
     }
 
-    // Validasi tanggal deadline
-    if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pilih tanggal deadline terlebih dahulu'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
 
-    // Simulasi proses penyimpanan
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final kuisData = {
+        'nama_kuis': _judulController.text.trim(),
+        'deadline': _selectedDate != null ? _formatDateForApi(_selectedDate!) : null,
+        'durasi_menit': 30,
+        'status': 'published',
+      };
 
-    // Membuat objek kuis baru dengan format yang sesuai
-    final kuisData = {
-      'judul': _judulController.text.trim(),
-      'gambar': _selectedImage?.path,
-      'tanggalDeadline': _formatDateForDeadline(_selectedDate!), // Format YYYY-MM-DD
-      'createdAt': DateTime.now().toString().split(' ')[0],
-    };
+      setState(() {
+        _isLoading = false;
+      });
 
-    // Debug print
-    print('Data kuis yang akan dikirim: $kuisData');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(widget.isEdit 
+            ? 'Kuis berhasil diperbarui!' 
+            : 'Kuis berhasil ditambahkan!'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    // Tampilkan pesan sukses
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(widget.isEdit 
-          ? 'Kuis berhasil diperbarui!' 
-          : 'Kuis berhasil ditambahkan!'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
-    // Kembali ke halaman sebelumnya dengan hasil
-    Navigator.pop(context, kuisData);
+      Navigator.pop(context, kuisData);
+      
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
-  Future<bool> _onWillPop() async {
-    if (_judulController.text.isNotEmpty || 
-        _selectedImage != null ||
-        _selectedDate != null) {
-      return await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Konfirmasi'),
-          content: const Text('Data yang belum disimpan akan hilang. Yakin ingin keluar?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Batal'),
+  Widget _buildImagePlaceholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey[300]!,
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.image_outlined,
+              size: 32,
+              color: Colors.grey[400],
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Ya, Keluar'),
+            const SizedBox(height: 4),
+            Icon(
+              Icons.landscape_outlined,
+              size: 20,
+              color: Colors.grey[400],
             ),
           ],
         ),
-      ) ?? false;
-    }
-    return true;
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () async {
-              if (await _onWillPop()) {
-                Navigator.pop(context);
-              }
-            },
-          ),
-          title: Text(
-            widget.isEdit ? 'Edit Kuis' : 'Tambah Kuis',
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          bottom: const PreferredSize(
-            preferredSize: Size.fromHeight(1),
-            child: Divider(height: 1),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.isEdit ? 'Edit Kuis' : 'Tambah Kuis',
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Field Judul
-                const Text(
-                  'Judul',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _judulController,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.indigo, width: 2),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Judul tidak boleh kosong';
-                    }
-                    if (value.trim().length < 3) {
-                      return 'Judul minimal 3 karakter';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 25),
-                
-                // Field Tanggal Deadline
-                const Text(
-                  'Tanggal Deadline',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: _showDatePicker,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey, width: 1),
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Form Fields Section
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Judul Field
+                    const Text(
+                      'Judul',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: _selectedDate != null ? const Color(0xFF664f9f) : Colors.grey,
-                          size: 20,
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _judulController,
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.purple, width: 2),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        hintText: 'Masukkan judul kuis',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Judul tidak boleh kosong';
+                        }
+                        return null;
+                      },
+                    ),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Tanggal Deadline Field
+                    const Text(
+                      'Tanggal Deadline',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _showDatePicker,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: Colors.grey, width: 1),
+                          ),
+                        ),
+                        child: Text(
                           _selectedDate != null
-                              ? _formatDate(_selectedDate!)
+                              ? _formatDateForDisplay(_selectedDate!)
                               : 'Pilih tanggal deadline',
                           style: TextStyle(
                             fontSize: 16,
                             color: _selectedDate != null ? Colors.black87 : Colors.grey[600],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 25),
-                
-                // Section Upload Gambar
-                const Text(
-                  'Gambar Kuis ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                Row(
-                  children: [
-                    // Tombol Pilih Gambar
-                    ElevatedButton.icon(
-                      onPressed: _showImageSourceDialog,
-                      icon: const Icon(Icons.image, size: 18),
-                      label: const Text('Pilih Gambar'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: const Color(0xFF664f9f),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
                       ),
                     ),
                     
-                    const SizedBox(width: 15),
+                    const SizedBox(height: 32),
                     
-                    // Preview Gambar
-                    GestureDetector(
-                      onTap: _selectedImage != null ? _removeImage : _showImageSourceDialog,
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50],
-                          border: Border.all(
-                            color: _selectedImage != null ? Colors.indigo : Colors.grey[300]!,
-                            width: _selectedImage != null ? 2 : 1,
-                            style: _selectedImage != null ? BorderStyle.solid : BorderStyle.values[1],
+                    // Gambar Kuis Section
+                    const Text(
+                      'Gambar Kuis',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    Row(
+                      children: [
+                        // Pilih Gambar Button
+                        ElevatedButton.icon(
+                          onPressed: _showImageSourceDialog,
+                          icon: const Icon(
+                            Icons.image,
+                            size: 18,
+                            color: Colors.white,
                           ),
-                          borderRadius: BorderRadius.circular(8),
+                          label: const Text(
+                            'Pilih Gambar',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            elevation: 0,
+                          ),
                         ),
-                        child: _selectedImage != null
-                            ? Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(6),
-                                    child: Image.file(
-                                      _selectedImage!,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
+                        
+                        const SizedBox(width: 16),
+                        
+                        // Image Preview
+                        GestureDetector(
+                          onTap: _selectedImage != null ? _removeImage : _showImageSourceDialog,
+                          child: _selectedImage != null
+                              ? Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.file(
+                                        _selectedImage!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                  ),
-                                  Positioned(
-                                    top: 4,
-                                    right: 4,
-                                    child: GestureDetector(
-                                      onTap: _removeImage,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(2),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                          size: 14,
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: GestureDetector(
+                                        onTap: _removeImage,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.red,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                            size: 14,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              )
-                            : const Icon(
-                                Icons.image,
-                                size: 32,
-                                color: Colors.grey,
-                              ),
-                      ),
+                                  ],
+                                )
+                              : _buildImagePlaceholder(),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                
-                const SizedBox(height: 40),
-                
-                // Tombol Submit
-                SizedBox(
+              ),
+              
+              const SizedBox(height: 20),
+              
+              // Silahkan Pilih Soal Section
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Silahkan Pilih Soal',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Questions List
+                    Column(
+                      children: availableQuestions.map((question) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  question['question'],
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Checkbox(
+                                value: question['selected'],
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    question['selected'] = value ?? false;
+                                  });
+                                },
+                                activeColor: Colors.purple,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 40),
+              
+              // Submit Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: const Color(0xFF664f9f),
-                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      backgroundColor: Colors.purple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      elevation: 2,
+                      elevation: 0,
                     ),
                     child: _isLoading
                         ? const Row(
@@ -503,8 +536,10 @@ class _TambahKuisPageState extends State<TambahKuisPage> {
                           ),
                   ),
                 ),
-              ],
-            ),
+              ),
+              
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
