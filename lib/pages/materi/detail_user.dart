@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
-import '../../models/materi_model.dart'; // Import your MateriModel
 
 class DetailUser extends StatelessWidget {
-  final MateriModel materi; // Add this parameter
+  final Map<String, dynamic> materi; // Data dari ApiServices
 
   const DetailUser({
     super.key,
-    required this.materi, // Make it required
+    required this.materi,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Ambil data dari map
+    final String title = materi['title'] ?? '';
+    final String description = materi['description'] ?? '';
+    final String date = materi['date'] ?? '';
+    // Jika ada field icon/iconColor/backgroundColor, sesuaikan tipe dan parsingnya
+    // Contoh: final IconData icon = Icons.book; // Default icon
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -35,7 +41,6 @@ class DetailUser extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card utama dengan konten materi
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -46,30 +51,26 @@ class DetailUser extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Gambar dan judul dalam layout vertikal
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Container untuk gambar dengan GestureDetector
                         GestureDetector(
                           onTap: () => _showImageDialog(context),
                           child: Container(
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: materi.backgroundColor ?? Colors.orange[300], // Use dynamic color
+                              color: Colors.orange[300],
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // Show the actual icon from MateriModel
-                                Icon(
-                                  materi.icon,
-                                  color: materi.iconColor ?? Colors.white,
+                                const Icon(
+                                  Icons.book,
+                                  color: Colors.white,
                                   size: 40,
                                 ),
-                                // Icon untuk menunjukkan gambar bisa diklik
                                 Positioned(
                                   bottom: 5,
                                   right: 5,
@@ -91,12 +92,9 @@ class DetailUser extends StatelessWidget {
                             ),
                           ),
                         ),
-                        
                         const SizedBox(height: 16),
-                        
-                        // Judul
                         Text(
-                          materi.title, // Use dynamic title
+                          title,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -105,12 +103,9 @@ class DetailUser extends StatelessWidget {
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 16),
-                    
-                    // Deskripsi materi
                     Text(
-                      materi.description, // Use dynamic description
+                      description,
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black87,
@@ -119,12 +114,9 @@ class DetailUser extends StatelessWidget {
                       ),
                       textAlign: TextAlign.justify,
                     ),
-                    
                     const SizedBox(height: 24),
-                    
-                    // Tanggal pembuatan
                     Text(
-                      'Created At: ${materi.date}', // Use dynamic date
+                      'Created At: $date',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[500],
@@ -135,7 +127,6 @@ class DetailUser extends StatelessWidget {
                 ),
               ),
             ),
-            
             const SizedBox(height: 20),
           ],
         ),
@@ -143,7 +134,6 @@ class DetailUser extends StatelessWidget {
     );
   }
 
-  // Method untuk menampilkan dialog gambar
   void _showImageDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -160,7 +150,6 @@ class DetailUser extends StatelessWidget {
             ),
             child: Column(
               children: [
-                // Header dialog
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -182,24 +171,22 @@ class DetailUser extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Gambar besar
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: materi.backgroundColor ?? Colors.orange[300], // Use dynamic color
+                      color: Colors.orange[300],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Icon(
-                        materi.icon, // Use dynamic icon
-                        color: materi.iconColor ?? Colors.white,
-                        size: 120, // Larger icon for the dialog
+                        Icons.book,
+                        color: Colors.white,
+                        size: 120,
                       ),
                     ),
                   ),
                 ),
-                // Footer dengan deskripsi singkat
               ],
             ),
           ),

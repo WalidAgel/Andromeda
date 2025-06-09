@@ -11,14 +11,14 @@ class ApiService {
   // Untuk Android Emulator: 'http://10.0.2.2:8000/api'
   // Untuk iOS Simulator: 'http://localhost:8000/api'
   // Untuk Physical Device: 'http://192.168.1.100:8000/api' (ganti dengan IP Anda)
-  
+
   static const Duration timeoutDuration = Duration(seconds: 10);
 
   // Headers
   static Map<String, String> get headers => {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
 
   static Future<Map<String, String>> get headersWithAuth async {
     final token = await getToken();
@@ -80,7 +80,7 @@ class ApiService {
   }) async {
     try {
       print('Making request to: $baseUrl$url'); // Debug print
-      
+
       final uri = Uri.parse('$baseUrl$url');
       final requestHeaders = requiresAuth ? await headersWithAuth : headers;
 
@@ -91,25 +91,31 @@ class ApiService {
 
       switch (method.toUpperCase()) {
         case 'GET':
-          response = await http.get(uri, headers: requestHeaders)
+          response = await http
+              .get(uri, headers: requestHeaders)
               .timeout(timeoutDuration);
           break;
         case 'POST':
-          response = await http.post(
-            uri,
-            headers: requestHeaders,
-            body: body != null ? jsonEncode(body) : null,
-          ).timeout(timeoutDuration);
+          response = await http
+              .post(
+                uri,
+                headers: requestHeaders,
+                body: body != null ? jsonEncode(body) : null,
+              )
+              .timeout(timeoutDuration);
           break;
         case 'PUT':
-          response = await http.put(
-            uri,
-            headers: requestHeaders,
-            body: body != null ? jsonEncode(body) : null,
-          ).timeout(timeoutDuration);
+          response = await http
+              .put(
+                uri,
+                headers: requestHeaders,
+                body: body != null ? jsonEncode(body) : null,
+              )
+              .timeout(timeoutDuration);
           break;
         case 'DELETE':
-          response = await http.delete(uri, headers: requestHeaders)
+          response = await http
+              .delete(uri, headers: requestHeaders)
               .timeout(timeoutDuration);
           break;
         default:
@@ -119,9 +125,8 @@ class ApiService {
       print('Response status: ${response.statusCode}'); // Debug print
       print('Response body: ${response.body}'); // Debug print
 
-      final responseData = response.body.isNotEmpty 
-          ? jsonDecode(response.body) 
-          : {};
+      final responseData =
+          response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
       return ApiResponse(
         success: response.statusCode >= 200 && response.statusCode < 300,
@@ -140,7 +145,8 @@ class ApiService {
       print('SocketException: $e'); // Debug print
       return ApiResponse(
         success: false,
-        message: 'Tidak dapat terhubung ke server. Pastikan server Laravel berjalan di $baseUrl',
+        message:
+            'Tidak dapat terhubung ke server. Pastikan server Laravel berjalan di $baseUrl',
         statusCode: 0,
       );
     } on HttpException catch (e) {
@@ -246,23 +252,29 @@ class ApiService {
   }
 
   static Future<ApiResponse> logout() async {
-    final response = await _makeRequest(
-      method: 'POST',
-      url: '/logout',
-      requiresAuth: true,
-    );
-
-    // Remove local data regardless of response
-    await removeToken();
-
-    return response;
+    // Panggil API logout jika perlu, tapi yang terpenting hapus data lokal
+    try {
+      await _makeRequest(
+        method: 'POST',
+        url: '/logout',
+        requiresAuth: true,
+      );
+    } catch (_) {
+      // Abaikan error, tetap hapus data lokal
+    }
+    // Hapus semua data login dari SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('user_type');
+    await prefs.remove('user_data');
+    return ApiResponse(success: true, message: 'Logged out', statusCode: 200);
   }
 
   // Materi Methods
   static Future<ApiResponse> getMateri() async {
     final userType = await getUserType();
     final endpoint = userType == 'admin' ? '/admin/materi' : '/user/materi';
-    
+
     return await _makeRequest(
       method: 'GET',
       url: endpoint,
@@ -270,13 +282,41 @@ class ApiService {
     );
   }
 
+  static Future<ApiResponse> updateMateri(int id, Map<String, dynamic> materiData) async {
+  return await _makeRequest(
+    method: 'PUT',
+    url: '/admin/materi/$id',
+    body: materiData,
+    requiresAuth: true,
+  );
+}
+
   static Future<ApiResponse> getMateriById(int id) async {
     final userType = await getUserType();
-    final endpoint = userType == 'admin' ? '/admin/materi/$id' : '/user/materi/$id';
-    
+    final endpoint =
+        userType == 'admin' ? '/admin/materi/$id' : '/user/materi/$id';
+
     return await _makeRequest(
       method: 'GET',
       url: endpoint,
+      requiresAuth: true,
+    );
+  }
+
+  static Future<ApiResponse> tambahMateri(
+      Map<String, dynamic> materiData) async {
+    return await _makeRequest(
+      method: 'POST',
+      url: '/admin/materi', // atau '/materi' sesuai endpoint backend Anda
+      body: materiData,
+      requiresAuth: true,
+    );
+  }
+
+  static Future<ApiResponse> hapusMateri(int id) async {
+    return await _makeRequest(
+      method: 'DELETE',
+      url: '/admin/materi/$id', // Pastikan endpoint sesuai backend Anda
       requiresAuth: true,
     );
   }
@@ -284,14 +324,24 @@ class ApiService {
   // Soal Methods
   static Future<ApiResponse> getSoal() async {
     final userType = await getUserType();
-    final endpoint = userType == 'admin' ? '/admin/soal' : '/admin/soal'; // User bisa lihat semua soal
-    
+    final endpoint = userType == 'admin'
+        ? '/admin/soal'
+        : '/admin/soal'; // User bisa lihat semua soal
+
     return await _makeRequest(
       method: 'GET',
       url: endpoint,
       requiresAuth: true,
     );
   }
+
+  static Future<ApiResponse> getSoalUserById(int id) async {
+  return await _makeRequest(
+    method: 'GET',
+    url: '/user/soal/$id',
+    requiresAuth: true,
+  );
+}
 
   static Future<ApiResponse> getSoalById(int id) async {
     return await _makeRequest(
@@ -301,11 +351,51 @@ class ApiService {
     );
   }
 
+  // Ambil daftar soal (untuk admin/user)
+  static Future<List<Map<String, dynamic>>> getSoalList() async {
+    final response = await getSoal();
+    if (response.success && response.data != null) {
+      final List<dynamic> data = response.data['data'] ?? [];
+      return data.cast<Map<String, dynamic>>();
+    }
+    return [];
+  }
+
+  // Tambah soal (POST)
+  static Future<ApiResponse> addSoal(Map<String, dynamic> soalData) async {
+    return await _makeRequest(
+      method: 'POST',
+      url: '/admin/soal',
+      body: soalData,
+      requiresAuth: true,
+    );
+  }
+
+  // Update soal (PUT)
+  static Future<ApiResponse> updateSoal(
+      String id, Map<String, dynamic> soalData) async {
+    return await _makeRequest(
+      method: 'PUT',
+      url: '/admin/soal/$id',
+      body: soalData,
+      requiresAuth: true,
+    );
+  }
+
+  // Hapus soal (DELETE)
+  static Future<ApiResponse> deleteSoal(String id) async {
+    return await _makeRequest(
+      method: 'DELETE',
+      url: '/admin/soal/$id',
+      requiresAuth: true,
+    );
+  }
+
   // Kuis Methods
   static Future<ApiResponse> getKuis() async {
     final userType = await getUserType();
     final endpoint = userType == 'admin' ? '/admin/kuis' : '/user/kuis';
-    
+
     return await _makeRequest(
       method: 'GET',
       url: endpoint,
@@ -313,10 +403,65 @@ class ApiService {
     );
   }
 
+static Future<ApiResponse> updateKuis(int id, Map<String, dynamic> kuisData) async {
+  return await _makeRequest(
+    method: 'PUT',
+    url: '/admin/kuis/$id',
+    body: kuisData,
+    requiresAuth: true,
+  );
+}
+
+  static Future<ApiResponse> tambahKuis(Map<String, dynamic> kuisData) async {
+    return await _makeRequest(
+      method: 'POST',
+      url: '/admin/kuis', // atau '/kuis' sesuai endpoint backend Anda
+      body: kuisData,
+      requiresAuth: true,
+    );
+  }
+
+
+  static Future<ApiResponse> hapusKuis(int id) async {
+    return await _makeRequest(
+      method: 'DELETE',
+      url: '/admin/kuis/$id', 
+      requiresAuth: true,
+    );
+  }
+
+static Future<ApiResponse> deleteKuis(int id) async {
+  return await _makeRequest(
+    method: 'DELETE',
+    url: '/admin/kuis/$id',
+    requiresAuth: true,
+  );
+}
+
+static Future<List<Map<String, dynamic>>> getKuisList() async {
+  final response = await getKuis();
+  if (response.success && response.data != null) {
+    final List<dynamic> data = response.data['data'] ?? [];
+    return data.cast<Map<String, dynamic>>();
+  }
+  return [];
+}static Future<String?> uploadImage(File imageFile) async {
+  final uri = Uri.parse('$baseUrl/upload');
+  final request = http.MultipartRequest('POST', uri);
+  request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+  final response = await request.send();
+  if (response.statusCode == 200) {
+    final respStr = await response.stream.bytesToString();
+    final data = jsonDecode(respStr);
+    return data['url']; // atau field lain sesuai response backend
+  }
+  return null;
+}
+  
   static Future<ApiResponse> getKuisById(int id) async {
     final userType = await getUserType();
     final endpoint = userType == 'admin' ? '/admin/kuis/$id' : '/user/kuis/$id';
-    
+
     return await _makeRequest(
       method: 'GET',
       url: endpoint,
@@ -328,7 +473,7 @@ class ApiService {
   static Future<ApiResponse> getProfile() async {
     final userType = await getUserType();
     final endpoint = userType == 'admin' ? '/admin/profile' : '/user/profile';
-    
+
     return await _makeRequest(
       method: 'GET',
       url: endpoint,
@@ -356,14 +501,17 @@ class ApiService {
   static Future<bool> testConnection() async {
     try {
       print('Testing connection to: $baseUrl');
-      
-      final response = await http.get(
-        Uri.parse('$baseUrl/../'),  // Test root Laravel endpoint
-        headers: headers,
-      ).timeout(const Duration(seconds: 5));
-      
+
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/../'), // Test root Laravel endpoint
+            headers: headers,
+          )
+          .timeout(const Duration(seconds: 5));
+
       print('Test connection status: ${response.statusCode}');
-      return response.statusCode == 200 || response.statusCode == 404; // 404 is also OK for Laravel
+      return response.statusCode == 200 ||
+          response.statusCode == 404; // 404 is also OK for Laravel
     } catch (e) {
       print('Test connection error: $e');
       return false;

@@ -1,6 +1,7 @@
 // File: lib/pages/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_services.dart';
 
 class LoginPage extends StatefulWidget {
@@ -107,6 +108,8 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
   }
+
+  // Duplicate _login(BuildContext context) method removed because the correct login logic is already implemented above.
 
   @override
   Widget build(BuildContext context) {

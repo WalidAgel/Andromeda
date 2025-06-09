@@ -1,26 +1,134 @@
 // File: pages/materi_page.dart
 import 'package:flutter/material.dart';
 import 'package:haloo/pages/materi/form_materi.dart';
-import 'package:haloo/pages/materi/detail_materi.dart';  // Import halaman detail
-import 'package:haloo/widget/materi_card.dart';
+import 'package:haloo/pages/materi/detail_materi.dart';
 import 'package:haloo/widget/sidebar.dart';
-import '../models/materi_model.dart';
+import 'package:haloo/services/api_services.dart';
+import 'package:haloo/widget/materi_card.dart';
 
 class MateriPage extends StatefulWidget {
   const MateriPage({super.key});
 
   @override
-  _MateriPageState createState() => _MateriPageState();
+  State<MateriPage> createState() => _MateriPageState();
 }
 
 class _MateriPageState extends State<MateriPage> {
-  List<MateriModel> materiList = [];
+  List<dynamic> materiList = [];
+  bool isLoading = true;
+  String? errorMsg;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMateri();
+  }
+
+  Future<void> fetchMateri() async {
+    setState(() {
+      isLoading = true;
+      errorMsg = null;
+    });
+    try {
+      final response = await ApiService.getMateri();
+      if (response.success && response.data != null) {
+        setState(() {
+          materiList = response.data['data'] ?? [];
+        });
+      } else {
+        setState(() {
+          errorMsg = response.message;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMsg = 'Terjadi kesalahan: $e';
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  // Contoh hapus materi via API (jika endpoint tersedia)
+  Future<void> _deleteMateri(dynamic materi) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Materi'),
+        content:
+            Text('Yakin ingin menghapus materi "${materi['title'] ?? ''}"?'),
+        actions: [
+          TextButton(
+            child: const Text('Batal'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Hapus'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      // Contoh: jika ada endpoint deleteMateri
+      // await ApiService.deleteMateri(materi['id']);
+      setState(() {
+        materiList.removeWhere((item) => item['id'] == materi['id']);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Materi berhasil dihapus!')),
+      );
+    }
+  }
+
+  // Navigasi ke detail materi (jika ingin)
+  void _viewDetail(BuildContext context, dynamic materi) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailMateriPage(materiId: materi['id']),
+      ),
+    );
+  }
+
+  // Navigasi ke tambah materi (jika ingin)
+  void _navigateToAddMateri(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const TambahMateriPage(),
+      ),
+    );
+    if (result != null) {
+      fetchMateri(); // Refresh dari API setelah tambah
+    }
+  }
+
+  // Navigasi ke edit materi (jika ingin)
+  void _editMateri(BuildContext context, dynamic materi) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TambahMateriPage(
+          isEdit: true,
+          existingMateri: materi,
+        ),
+      ),
+    );
+    if (result != null) {
+      fetchMateri(); // Refresh dari API setelah edit
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Materi Admin', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Daftar Materi',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -33,198 +141,28 @@ class _MateriPageState extends State<MateriPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _navigateToAddMateri(context), 
+            onPressed: () => _navigateToAddMateri(context),
           ),
         ],
       ),
       drawer: const Sidebar(),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: materiList.length,
-        itemBuilder: (context, index) {
-          return MateriCard(
-            materi: materiList[index],
-            onEdit: () => _editMateri(context, materiList[index]),
-            onDelete: () => _deleteMateri(context, materiList[index]),
-            onDetail: () => _viewDetail(context, materiList[index]), // Tambah fungsi detail
-          );
-        },
-      ),
-    );
-  }
-
-  // Metode untuk navigasi ke halaman detail materi
-  void _viewDetail(BuildContext context, MateriModel materi) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetailMateriPage(materi: materi),
-      ),
-    );
-  }
-
-  // Metode untuk navigasi ke form tambah materi
-  void _navigateToAddMateri(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const TambahMateriPage(),
-      ),
-    );
-
-    // Jika ada data yang dikembalikan dari form
-    if (result != null) {
-      _addNewMateri(result);
-    }
-  }
-
-  // Metode untuk menambah materi baru ke list
-  void _addNewMateri(Map<String, dynamic> materiData) {
-    setState(() {
-      materiList.add(
-        MateriModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate ID sederhana
-          title: materiData['judul'],
-          description: materiData['deskripsi'],
-          date: DateTime.now().toString().split(' ')[0], // Format YYYY-MM-DD
-          icon: Icons.article, // Icon default
-          iconColor: Colors.green,
-          backgroundColor: Colors.green[100],
-        ),
-      );
-    });
-  }
-
-  // Metode untuk navigasi ke form edit materi
-  void _navigateToEditMateri(BuildContext context, MateriModel materi) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TambahMateriPage(
-          // Jika Anda ingin mengedit, Anda perlu menambahkan parameter di TambahMateriPage
-          isEdit: true,
-          existingMateri: materi,
-        ),
-      ),
-    );
-
-    if (result != null) {
-      _updateMateri(materi.id, result);
-    }
-  }
-
-  // Metode untuk update materi
-  void _updateMateri(String id, Map<String, dynamic> updatedData) {
-    setState(() {
-      final index = materiList.indexWhere((materi) => materi.id == id);
-      if (index != -1) {
-        materiList[index] = MateriModel(
-          id: id,
-          title: updatedData['judul'],
-          description: updatedData['deskripsi'],
-          date: materiList[index].date, // Tetap gunakan tanggal asli
-          icon: materiList[index].icon,
-          iconColor: materiList[index].iconColor,
-          backgroundColor: materiList[index].backgroundColor,
-        );
-      }
-    });
-  }
-
-  void _editMateri(BuildContext context, MateriModel materi) {
-    _navigateToEditMateri(context, materi);
-  }
-
-  // Metode dialog edit alternatif (jika Anda masih ingin menggunakan dialog)
-  void _showEditDialog(BuildContext context, MateriModel materi) {
-    final TextEditingController titleController = TextEditingController(text: materi.title);
-    final TextEditingController descriptionController = TextEditingController(text: materi.description);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Materi'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Judul Materi',
-                    border: OutlineInputBorder(),
-                  ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMsg != null
+              ? Center(child: Text(errorMsg!))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: materiList.length,
+                  itemBuilder: (context, index) {
+                    final materi = materiList[index];
+                    return MateriCard(
+                      materi: materi, // materi adalah Map<String, dynamic>
+                      onTap: () => _viewDetail(context, materi),
+                      onEdit: () => _editMateri(context, materi),
+                      onDelete: () => _deleteMateri(materi),
+                    );
+                  },
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Deskripsi',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 4,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            ElevatedButton(
-              child: const Text('Update'),
-              onPressed: () {
-                if (titleController.text.isNotEmpty && 
-                    descriptionController.text.isNotEmpty) {
-                  _updateMateri(materi.id, {
-                    'judul': titleController.text,
-                    'deskripsi': descriptionController.text,
-                  });
-                  Navigator.of(context).pop();
-                  
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Materi berhasil diupdate!')),
-                  );
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _deleteMateri(BuildContext context, MateriModel materi) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Hapus Materi'),
-          content: Text('Apakah Anda yakin ingin menghapus materi "${materi.title}"?'),
-          actions: [
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Hapus'),
-              onPressed: () {
-                setState(() {
-                  materiList.removeWhere((item) => item.id == materi.id);
-                });
-                Navigator.of(context).pop();
-                
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Materi berhasil dihapus!')),
-                );
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

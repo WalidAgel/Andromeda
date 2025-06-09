@@ -103,7 +103,6 @@ class _SidebarUserState extends State<SidebarUser> {
                         ),
                 ),
                 const SizedBox(height: 10),
-                
                 if (isLoading)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +157,7 @@ class _SidebarUserState extends State<SidebarUser> {
               ],
             ),
           ),
-          
+
           // Menu items
           ListTile(
             leading: const Icon(Icons.person),
@@ -169,7 +168,7 @@ class _SidebarUserState extends State<SidebarUser> {
               // Navigator.pushNamed(context, '/profile');
             },
           ),
-          
+
           ListTile(
             leading: const Icon(Icons.book),
             title: const Text('Materi'),
@@ -178,7 +177,7 @@ class _SidebarUserState extends State<SidebarUser> {
               Navigator.pushNamed(context, '/materi-user');
             },
           ),
-          
+
           ListTile(
             leading: const Icon(Icons.assignment),
             title: const Text('Soal'),
@@ -187,13 +186,13 @@ class _SidebarUserState extends State<SidebarUser> {
               Navigator.pushNamed(context, '/soal-user');
             },
           ),
-          
+
           const Divider(),
-          
+
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text(
-              'Logout', 
+              'Logout',
               style: TextStyle(color: Colors.red),
             ),
             onTap: () {
@@ -237,51 +236,14 @@ class _SidebarUserState extends State<SidebarUser> {
   }
 
   Future<void> _performLogout(BuildContext context) async {
-    // Show loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF664f9f)),
-              ),
-              SizedBox(width: 20),
-              Text('Logging out...'),
-            ],
-          ),
-        );
-      },
-    );
-
     try {
-      // Call logout API
-      final response = await ApiService.logout();
-      
-      // Close loading dialog
-      Navigator.of(context).pop();
-      
-      // Navigate ke login dengan argumen logout success
-      Navigator.pushNamedAndRemoveUntil(
-        context, 
-        '/login', 
-        (route) => false,
-        arguments: 'logout_success',
-      );
-      
-    } catch (e) {
-      // Close loading dialog
-      Navigator.of(context).pop();
-      
-      // Still navigate to login even if API call fails
-      Navigator.pushNamedAndRemoveUntil(
-        context, 
-        '/login', 
-        (route) => false,
-        arguments: 'logout_success',
-      );
-    }
+      await ApiService.logout();
+    } catch (_) {}
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/login',
+      (route) => false,
+      arguments: 'logout_success',
+    );
   }
 }

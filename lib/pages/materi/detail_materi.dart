@@ -1,13 +1,63 @@
 import 'package:flutter/material.dart';
-import '../../models/materi_model.dart'; // Import your MateriModel
+import 'package:haloo/services/api_services.dart';
+// import 'package:intl/intl.dart';
 
-class DetailMateriPage extends StatelessWidget {
-  final MateriModel materi; // Add this parameter
+class DetailMateriPage extends StatefulWidget {
+  final dynamic materiId; // Bisa String/int
 
   const DetailMateriPage({
     super.key,
-    required this.materi, // Make it required
+    required this.materiId,
   });
+
+  @override
+  State<DetailMateriPage> createState() => _DetailMateriPageState();
+}
+
+class _DetailMateriPageState extends State<DetailMateriPage> {
+  Map<String, dynamic>? materi;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMateri();
+  }
+
+  Future<void> fetchMateri() async {
+    setState(() {
+      isLoading = true;
+    });
+    final response =
+        await ApiService.getMateriById(int.parse(widget.materiId.toString()));
+    if (response.success && response.data != null) {
+      setState(() {
+        materi = response.data['data'];
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      // Tampilkan error jika perlu
+    }
+  }
+
+  String _timeAgo(String dateString) {
+    if (dateString.isEmpty) return '';
+    final date = DateTime.tryParse(dateString);
+    if (date == null) return '';
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inSeconds < 60) return 'baru saja';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} menit yang lalu';
+    if (diff.inHours < 24) return '${diff.inHours} jam yang lalu';
+    if (diff.inDays < 30) return '${diff.inDays} hari yang lalu';
+    if (diff.inDays < 365)
+      return '${(diff.inDays / 30).floor()} bulan yang lalu';
+    return '${(diff.inDays / 365).floor()} tahun yang lalu';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,187 +80,98 @@ class DetailMateriPage extends StatelessWidget {
         ),
         centerTitle: false,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Card utama dengan konten materi
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Gambar dan judul
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Container untuk gambar dengan GestureDetector
-                        GestureDetector(
-                          onTap: () => _showImageDialog(context),
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: materi.backgroundColor ?? Colors.orange[300], // Use dynamic color
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Show the actual icon from MateriModel
-                                Icon(
-                                  materi.icon,
-                                  color: materi.iconColor ?? Colors.white,
-                                  size: 40,
-                                ),
-                                // Icon untuk menunjukkan gambar bisa diklik
-                                Positioned(
-                                  bottom: 5,
-                                  right: 5,
-                                  child: Container(
-                                    width: 16,
-                                    height: 16,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black54,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.zoom_in,
-                                      size: 10,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : materi == null
+              ? const Center(child: Text('Materi tidak ditemukan'))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(width: 16),
-                        // Judul
-                        Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                materi.title, // Use dynamic title
+                                materi!['judul'] ?? materi!['title'] ?? '',
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 16),
+                              // FOTO MATERI ATAU DEFAULT
+                              if (materi!['gambar'] != null &&
+                                  materi!['gambar'].toString().isNotEmpty)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    materi!['gambar'],
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (c, e, s) => _defaultImage(),
+                                  ),
+                                )
+                              else
+                                _defaultImage(),
+                              const SizedBox(height: 20),
+                              Text(
+                                materi!['konten_materi'] ??
+                                    materi!['deskripsi'] ??
+                                    materi!['description'] ??
+                                    '',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                  height: 1.6,
+                                  letterSpacing: 0.2,
+                                ),
+                                textAlign: TextAlign.justify,
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                'Dibuat: ${_timeAgo(materi!['created_at'] ?? materi!['tanggal_dibuat'] ?? materi!['date'] ?? '')}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    // Deskripsi materi
-                    Text(
-                      materi.description, // Use dynamic description
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                        height: 1.6,
-                        letterSpacing: 0.2,
                       ),
-                      textAlign: TextAlign.justify,
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Tanggal pembuatan
-                    Text(
-                      'Created At: ${materi.date}', // Use dynamic date
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Method untuk menampilkan dialog gambar
-  void _showImageDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.6,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                // Header dialog
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                        constraints: const BoxConstraints(),
-                        padding: EdgeInsets.zero,
-                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
-                // Gambar besar
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: materi.backgroundColor ?? Colors.orange[300], // Use dynamic color
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        materi.icon, // Use dynamic icon
-                        color: materi.iconColor ?? Colors.white,
-                        size: 120, // Larger icon for the dialog
-                      ),
-                    ),
-                  ),
-                ),
-                // Footer dengan deskripsi singkat
-              ],
-            ),
-          ),
-        );
-      },
+    );
+  }
+
+  Widget _defaultImage() {
+    return Container(
+      height: 180,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.purple[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Icon(
+        Icons.image_not_supported,
+        color: Colors.white,
+        size: 60,
+      ),
     );
   }
 }
+
+// Saat klik detail di MateriCard atau ListTile

@@ -1,6 +1,7 @@
 // File: lib/pages/splash_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_services.dart';
 
 class SplashPage extends StatefulWidget {
@@ -10,16 +11,15 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> 
+class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
-  
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -34,20 +34,36 @@ class _SplashPageState extends State<SplashPage>
     ));
 
     _controller.forward();
-    
+
     // Check login status dan navigate setelah 3 detik
-    _initializeApp();
+    _checkLogin();
   }
 
-  Future<void> _initializeApp() async {
+  Future<void> _checkLogin() async {
     await Future.delayed(const Duration(seconds: 3));
-    
-    if (mounted) {
-      // Clear any existing tokens/session first for fresh start
-      await ApiService.removeToken();
-      
-      // Always navigate to login on fresh app start
+    final token = await ApiService.getToken();
+    if (token != null && token.isNotEmpty) {
+      // Lanjut ke halaman utama
+      Navigator.pushReplacementNamed(context, '/user-choice');
+    } else {
+      // Ke halaman login
       Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
+  Future<void> _checkLoginStatus(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final role = prefs.getString('role');
+
+    if (token != null && token.isNotEmpty) {
+      if (role == 'admin') {
+        Navigator.of(context).pushReplacementNamed('/admin/home');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/user/home');
+      }
+    } else {
+      Navigator.of(context).pushReplacementNamed('/login');
     }
   }
 

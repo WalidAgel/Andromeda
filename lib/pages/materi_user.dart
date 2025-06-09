@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:haloo/pages/materi/detail_user.dart';
-import 'package:haloo/models/materi_model.dart';
 import 'package:haloo/widget/sidebar_user.dart';
 import 'package:haloo/services/api_services.dart';
 
@@ -12,7 +11,7 @@ class MateriUser extends StatefulWidget {
 }
 
 class _MateriUserState extends State<MateriUser> {
-  List<MateriModel> materiList = [];
+  List<Map<String, dynamic>> materiList = [];
   bool isLoading = true;
   String? errorMessage;
 
@@ -30,85 +29,45 @@ class _MateriUserState extends State<MateriUser> {
 
     try {
       final response = await ApiService.getMateri();
-      
+
       if (response.success && response.data != null) {
         final List<dynamic> materiData = response.data['data'] ?? [];
-        
+
         setState(() {
-          materiList = materiData.map((item) => MateriModel(
-            id: item['id'].toString(),
-            title: item['judul'] ?? '',
-            description: item['konten_materi'] ?? '',
-            date: _formatDate(item['created_at']),
-            icon: _getIconForMateri(item['judul']),
-            backgroundColor: _getColorForMateri(item['judul']),
-            iconColor: Colors.white,
-          )).toList();
+          materiList = materiData.cast<Map<String, dynamic>>();
           isLoading = false;
         });
       } else {
         setState(() {
           errorMessage = response.message;
           isLoading = false;
-          // Fallback ke data dummy jika API gagal
-          _loadDummyData();
+          materiList = [];
         });
       }
     } catch (e) {
       setState(() {
         errorMessage = 'Terjadi kesalahan: $e';
         isLoading = false;
-        // Fallback ke data dummy jika error
-        _loadDummyData();
+        materiList = [];
       });
     }
   }
 
-  void _loadDummyData() {
-    materiList = [
-      MateriModel(
-        id: "1",
-        title: "Berpikir Komputasional",
-        date: "2025-05-25",
-        description:
-            "Berpikir komputasional merupakan metode pemecahan masalah dengan menerapkan teknologi ilmu komputer atau informatika. Berpikir komputasional juga dapat diartikan sebagai konsep tentang cara menemukan masalah yang ada di sekitar, dengan mengambil ide lalu mengembangkan solusi pemecahan masalah. Mungkin tidak sedikit orang mengira jika berpikir komputasional haruslah menggunakan aplikasi yang terdapat pada komputer.",
-        icon: Icons.psychology,
-        backgroundColor: Colors.blue[300],
-        iconColor: Colors.white,
-      ),
-      MateriModel(
-        id: "2",
-        title: "Sistem komputer",
-        date: "2025-05-23",
-        description:
-            "Sistem komputer adalah gabungan dari hardware (perangkat keras), software (perangkat lunak), dan brainware (manusia yang mengoperasikan) yang bekerja bersama-sama untuk memproses data dan menghasilkan informasi. Sistem ini merupakan dasar dari teknologi informasi dan memungkinkan kita untuk melakukan berbagai tugas, mulai dari pekerjaan kantor hingga hiburan digital.",
-        icon: Icons.computer,
-        backgroundColor: Colors.green[300],
-        iconColor: Colors.white,
-      ),
-      MateriModel(
-        id: "3",
-        title: "CPU",
-        date: "2025-05-23",
-        description:
-            "CPU, atau Central Processing Unit, adalah otak dari komputer yang bertugas memproses semua instruksi dan data. Ia berfungsi sebagai pusat kontrol utama, mengarahkan operasi komputer, mulai dari menjalankan aplikasi hingga melakukan perhitungan matematis.",
-        icon: Icons.memory,
-        backgroundColor: Colors.orange[300],
-        iconColor: Colors.white,
-      ),
-    ];
-  }
-
   IconData _getIconForMateri(String title) {
-    if (title.toLowerCase().contains('komputasional') || title.toLowerCase().contains('berpikir')) {
+    if (title.toLowerCase().contains('komputasional') ||
+        title.toLowerCase().contains('berpikir')) {
       return Icons.psychology;
-    } else if (title.toLowerCase().contains('sistem') || title.toLowerCase().contains('komputer')) {
+    } else if (title.toLowerCase().contains('sistem') ||
+        title.toLowerCase().contains('komputer')) {
       return Icons.computer;
-    } else if (title.toLowerCase().contains('cpu') || title.toLowerCase().contains('processor')) {
+    } else if (title.toLowerCase().contains('cpu') ||
+        title.toLowerCase().contains('processor')) {
       return Icons.memory;
-    } else if (title.toLowerCase().contains('network') || title.toLowerCase().contains('jaringan')) {
+    } else if (title.toLowerCase().contains('network') ||
+        title.toLowerCase().contains('jaringan')) {
       return Icons.network_check;
-    } else if (title.toLowerCase().contains('database') || title.toLowerCase().contains('data')) {
+    } else if (title.toLowerCase().contains('database') ||
+        title.toLowerCase().contains('data')) {
       return Icons.storage;
     } else {
       return Icons.book;
@@ -116,15 +75,20 @@ class _MateriUserState extends State<MateriUser> {
   }
 
   Color? _getColorForMateri(String title) {
-    if (title.toLowerCase().contains('komputasional') || title.toLowerCase().contains('berpikir')) {
+    if (title.toLowerCase().contains('komputasional') ||
+        title.toLowerCase().contains('berpikir')) {
       return Colors.blue[300];
-    } else if (title.toLowerCase().contains('sistem') || title.toLowerCase().contains('komputer')) {
+    } else if (title.toLowerCase().contains('sistem') ||
+        title.toLowerCase().contains('komputer')) {
       return Colors.green[300];
-    } else if (title.toLowerCase().contains('cpu') || title.toLowerCase().contains('processor')) {
+    } else if (title.toLowerCase().contains('cpu') ||
+        title.toLowerCase().contains('processor')) {
       return Colors.orange[300];
-    } else if (title.toLowerCase().contains('network') || title.toLowerCase().contains('jaringan')) {
+    } else if (title.toLowerCase().contains('network') ||
+        title.toLowerCase().contains('jaringan')) {
       return Colors.purple[300];
-    } else if (title.toLowerCase().contains('database') || title.toLowerCase().contains('data')) {
+    } else if (title.toLowerCase().contains('database') ||
+        title.toLowerCase().contains('data')) {
       return Colors.red[300];
     } else {
       return Colors.teal[300];
@@ -143,6 +107,15 @@ class _MateriUserState extends State<MateriUser> {
 
   Future<void> _refreshMateri() async {
     await _loadMateri();
+  }
+
+  void _viewDetail(BuildContext context, Map<String, dynamic> materi) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailUser(materi: materi),
+      ),
+    );
   }
 
   @override
@@ -294,6 +267,13 @@ class _MateriUserState extends State<MateriUser> {
         itemCount: materiList.length,
         itemBuilder: (context, index) {
           final materi = materiList[index];
+          final title = materi['judul'] ?? '';
+          final description = materi['konten_materi'] ?? '';
+          final date = _formatDate(materi['created_at']);
+          final id = materi['id']?.toString() ?? '';
+          final icon = _getIconForMateri(title);
+          final backgroundColor = _getColorForMateri(title);
+
           return Card(
             margin: const EdgeInsets.only(bottom: 16),
             shape: RoundedRectangleBorder(
@@ -311,19 +291,19 @@ class _MateriUserState extends State<MateriUser> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: materi.backgroundColor,
+                          color: backgroundColor,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
-                          materi.icon,
-                          color: materi.iconColor,
+                          icon,
+                          color: Colors.white,
                           size: 20,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          materi.title,
+                          title,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -334,7 +314,7 @@ class _MateriUserState extends State<MateriUser> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    materi.description,
+                    description,
                     style: TextStyle(fontSize: 14, color: Colors.grey[800]),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
@@ -349,21 +329,23 @@ class _MateriUserState extends State<MateriUser> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        materi.date,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        date,
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: materi.backgroundColor?.withOpacity(0.1),
+                          color: backgroundColor?.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'ID: ${materi.id}',
+                          'ID: $id',
                           style: TextStyle(
                             fontSize: 10,
-                            color: materi.backgroundColor,
+                            color: backgroundColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -375,13 +357,7 @@ class _MateriUserState extends State<MateriUser> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // Navigasi ke halaman DetailUser dengan MateriModel
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailUser(materi: materi), // Pass materi parameter
-                          ),
-                        );
+                        _viewDetail(context, materi);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF664f9f),

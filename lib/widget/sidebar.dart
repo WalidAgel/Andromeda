@@ -1,5 +1,6 @@
 // File: lib/widget/sidebar.dart
 import 'package:flutter/material.dart';
+import 'package:haloo/services/api_services.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -82,10 +83,16 @@ class Sidebar extends StatelessWidget {
             ),
             TextButton(
               child: const Text('Logout'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Implementasi logout logic
-                // Navigator.pushReplacementNamed(context, '/login');
+              onPressed: () async {
+                Navigator.of(context).pop(); // Tutup dialog konfirmasi
+                try {
+                  await ApiService.logout();
+                } catch (_) {}
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
+                  arguments: 'logout_success',
+                );
               },
             ),
           ],

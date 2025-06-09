@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../models/materi_model.dart'; // Import model yang sudah ada
+
+import 'package:haloo/services/api_services.dart'; 
 
 class TambahMateriPage extends StatefulWidget {
   final bool isEdit;
-  final MateriModel? existingMateri;
-  
+  final Map<String, dynamic>? existingMateri;
+
   const TambahMateriPage({
     super.key,
     this.isEdit = false,
@@ -21,7 +22,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
   final _formKey = GlobalKey<FormState>();
   final _judulController = TextEditingController();
   final _deskripsiController = TextEditingController();
-  
+
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
@@ -29,10 +30,12 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
   @override
   void initState() {
     super.initState();
-    // Jika mode edit, isi form dengan data yang ada
     if (widget.isEdit && widget.existingMateri != null) {
-      _judulController.text = widget.existingMateri!.title;
-      _deskripsiController.text = widget.existingMateri!.description;
+      _judulController.text = widget.existingMateri!['judul'] ?? '';
+      _deskripsiController.text = widget.existingMateri!['deskripsi'] ?? '';
+      if (widget.existingMateri!['gambar'] != null) {
+        _selectedImage = File(widget.existingMateri!['gambar']);
+      }
     }
   }
 
@@ -51,13 +54,14 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
         maxHeight: 1024,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         setState(() {
           _selectedImage = File(image.path);
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error memilih gambar: $e'),
@@ -107,13 +111,14 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
         maxHeight: 1024,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         setState(() {
           _selectedImage = File(image.path);
         });
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error mengambil foto: $e'),
@@ -130,68 +135,69 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
 
-    // Simulasi proses penyimpanan
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Membuat objek materi baru
     final materiData = {
       'judul': _judulController.text.trim(),
-      'deskripsi': _deskripsiController.text.trim(),
-      'gambar': _selectedImage?.path,
-      'tanggal_dibuat': DateTime.now().toIso8601String(),
+      'konten_materi': _deskripsiController.text.trim(),
+      // Jika ada upload gambar, tambahkan field 'gambar'
+      // 'gambar': _selectedImage != null ? await uploadImage(_selectedImage) : null,
     };
 
-    // Di sini Anda bisa menambahkan logika untuk menyimpan ke database
-    print('Data materi: $materiData');
+    final response = await ApiService.tambahMateri(materiData);
 
     setState(() {
       _isLoading = false;
     });
 
-    // Tampilkan pesan sukses
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(widget.isEdit 
-          ? 'Materi berhasil diperbarui!' 
-          : 'Materi berhasil ditambahkan!'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    if (!mounted) return;
 
-    // Kembali ke halaman sebelumnya dengan hasil
-    Navigator.pop(context, materiData);
+    if (response.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Materi berhasil ditambahkan!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.pop(context, true); // Kembali & refresh list
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.message),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<bool> _onWillPop() async {
-    if (_judulController.text.isNotEmpty || 
-        _deskripsiController.text.isNotEmpty || 
+    if (_judulController.text.isNotEmpty ||
+        _deskripsiController.text.isNotEmpty ||
         _selectedImage != null) {
       return await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Konfirmasi'),
-          content: const Text('Data yang belum disimpan akan hilang. Yakin ingin keluar?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Batal'),
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Konfirmasi'),
+              content: const Text(
+                  'Data yang belum disimpan akan hilang. Yakin ingin keluar?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Batal'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Ya, Keluar'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Ya, Keluar'),
-            ),
-          ],
-        ),
-      ) ?? false;
+          ) ??
+          false;
     }
     return true;
   }
@@ -233,7 +239,6 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Field Judul
                 const Text(
                   'Judul',
                   style: TextStyle(
@@ -262,10 +267,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                     return null;
                   },
                 ),
-                
                 const SizedBox(height: 25),
-                
-                // Field Deskripsi
                 const Text(
                   'Deskripsi',
                   style: TextStyle(
@@ -295,10 +297,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                     return null;
                   },
                 ),
-                
                 const SizedBox(height: 25),
-                
-                // Section Upload Gambar
                 const Text(
                   'Gambar Kuis',
                   style: TextStyle(
@@ -308,10 +307,8 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
                 Row(
                   children: [
-                    // Tombol Pilih Gambar
                     ElevatedButton.icon(
                       onPressed: _showImageSourceDialog,
                       icon: const Icon(Icons.image, size: 18),
@@ -327,21 +324,24 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                         ),
                       ),
                     ),
-                    
                     const SizedBox(width: 15),
-                    
-                    // Preview Gambar
                     GestureDetector(
-                      onTap: _selectedImage != null ? _removeImage : _showImageSourceDialog,
+                      onTap: _selectedImage != null
+                          ? _removeImage
+                          : _showImageSourceDialog,
                       child: Container(
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
                           color: Colors.grey[50],
                           border: Border.all(
-                            color: _selectedImage != null ? Colors.indigo : Colors.grey[300]!,
+                            color: _selectedImage != null
+                                ? Colors.indigo
+                                : Colors.grey[300]!,
                             width: _selectedImage != null ? 2 : 1,
-                            style: _selectedImage != null ? BorderStyle.solid : BorderStyle.values[1],
+                            style: _selectedImage != null
+                                ? BorderStyle.solid
+                                : BorderStyle.values[1],
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -387,10 +387,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                     ),
                   ],
                 ),
-                
                 const SizedBox(height: 40),
-                
-                // Tombol Submit
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -413,7 +410,8 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                                 height: 16,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
                                 ),
                               ),
                               SizedBox(width: 8),
@@ -437,3 +435,5 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
     );
   }
 }
+
+List<Map<String, dynamic>> materiList = [];
