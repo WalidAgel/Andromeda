@@ -8,10 +8,10 @@ class TambahMateriPage extends StatefulWidget {
   final MateriModel? existingMateri;
   
   const TambahMateriPage({
-    Key? key,
+    super.key,
     this.isEdit = false,
     this.existingMateri,
-  }) : super(key: key);
+  });
 
   @override
   State<TambahMateriPage> createState() => _TambahMateriPageState();

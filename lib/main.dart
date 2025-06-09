@@ -1,15 +1,14 @@
+// File: lib/main.dart
 import 'package:flutter/material.dart';
-import 'package:haloo/pages/materi/detail_materi.dart';
-import 'package:haloo/pages/materi_user.dart';
-import 'package:haloo/pages/splash1_page.dart';
-// import 'package:haloo/pages/materi_page.dart';
-import 'package:haloo/widget/tabBar.dart';
-import 'package:haloo/widget/tabbar_user.dart';
-// import 'package:haloo/widget/sidebar.dart';
-// import 'package:haloo/pages/login.dart';
-// import 'package:haloo/widget/tabBar.dart';
-// import 'package:haloo/pages/splash_page.dart';
-// import 'package:haloo/pages/splash_page.dart';
+import 'pages/splash_page.dart';
+import 'pages/login.dart';
+import 'pages/register_page.dart';
+import 'pages/user_choice_page.dart';
+import 'pages/materi_page.dart';
+import 'pages/materi_user.dart';
+import 'pages/soal_page.dart';
+import 'pages/soal_user.dart';
+import 'widget/tabBar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,31 +17,33 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Andromeda',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A5C96)),
+        useMaterial3: true,
+        fontFamily: 'Roboto',
       ),
-      home: MainScreenUser()
+      // Pastikan initial route adalah splash page
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashPage(),
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/user-choice': (context) => const UserChoicePage(),
+        '/admin-dashboard': (context) => const MainScreen(),
+        '/materi-user': (context) => const MateriUser(),
+        '/soal-user': (context) => const SoalUser(),
+      },
+      // Tambahkan ini untuk handle unknown routes
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) => const SplashPage(),
+        );
+      },
     );
   }
 }

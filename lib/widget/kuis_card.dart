@@ -9,12 +9,12 @@ class KuisCard extends StatelessWidget {
   final VoidCallback onDetail;
 
   const KuisCard({
-    Key? key,
+    super.key,
     required this.kuis,
     required this.onEdit,
     required this.onDelete,
     required this.onDetail,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

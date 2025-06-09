@@ -5,9 +5,9 @@ class DetailMateriPage extends StatelessWidget {
   final MateriModel materi; // Add this parameter
 
   const DetailMateriPage({
-    Key? key,
+    super.key,
     required this.materi, // Make it required
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -9,10 +9,10 @@ class TambahKuisPage extends StatefulWidget {
   final KuisModel? existingKuis;
   
   const TambahKuisPage({
-    Key? key,
+    super.key,
     this.isEdit = false,
     this.existingKuis,
-  }) : super(key: key);
+  });
 
   @override
   State<TambahKuisPage> createState() => _TambahKuisPageState();

@@ -4,6 +4,8 @@ import '../pages/kuis_page.dart';
 import '../pages/soal_page.dart';
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }

@@ -8,12 +8,12 @@ class SoalCard extends StatelessWidget {
   final VoidCallback onDetail;
 
   const SoalCard({
-    Key? key,
+    super.key,
     required this.soal,
     required this.onEdit,
     required this.onDelete,
     required this.onDetail,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

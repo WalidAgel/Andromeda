@@ -10,13 +10,13 @@ class MateriCard extends StatelessWidget {
   final VoidCallback? onDetail; // Added this missing parameter
 
   const MateriCard({
-    Key? key,
+    super.key,
     required this.materi,
     this.onEdit,
     this.onDelete,
     this.onTap,
     this.onDetail, // Added to constructor
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

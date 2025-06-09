@@ -4,6 +4,8 @@ import 'package:haloo/pages/soal_user.dart';
 
 
 class MainScreenUser extends StatefulWidget {
+  const MainScreenUser({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -13,8 +15,8 @@ class _MainScreenState extends State<MainScreenUser> {
 
   // List halaman yang akan ditampilkan
   final List<Widget> _pages = [
-    MateriUser(),
-    SoalUser(),
+    // MateriUser(),
+    // SoalUser(),
   ];
 
   void _onItemTapped(int index) {

@@ -7,6 +7,8 @@ import 'package:haloo/widget/sidebar.dart';
 import '../models/materi_model.dart';
 
 class MateriPage extends StatefulWidget {
+  const MateriPage({super.key});
+
   @override
   _MateriPageState createState() => _MateriPageState();
 }

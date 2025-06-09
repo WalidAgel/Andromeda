@@ -1,7 +1,67 @@
-// File: lib/widget/sidebar.dart
 import 'package:flutter/material.dart';
+import 'package:haloo/services/api_services.dart';
 
-class SidebarUser extends StatelessWidget {
+class SidebarUser extends StatefulWidget {
+  const SidebarUser({super.key});
+
+  @override
+  State<SidebarUser> createState() => _SidebarUserState();
+}
+
+class _SidebarUserState extends State<SidebarUser> {
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      // Coba ambil dari local storage dulu
+      final localData = await ApiService.getUserData();
+      if (localData != null) {
+        setState(() {
+          userData = localData;
+          isLoading = false;
+        });
+        return;
+      }
+
+      // Jika tidak ada di local, ambil dari API
+      final response = await ApiService.getProfile();
+      if (response.success && response.data != null) {
+        final profileData = response.data['data'];
+        setState(() {
+          userData = profileData;
+          isLoading = false;
+        });
+        // Save ke local storage
+        await ApiService.saveUserData(profileData);
+      } else {
+        setState(() {
+          isLoading = false;
+          // Fallback ke data default
+          userData = {
+            'nama_lengkap': 'User',
+            'username': 'user',
+          };
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        // Fallback ke data default
+        userData = {
+          'nama_lengkap': 'User',
+          'username': 'user',
+        };
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -19,41 +79,123 @@ class SidebarUser extends StatelessWidget {
                 CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.blue,
-                  ),
+                  child: userData?['foto_profile'] != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.network(
+                            userData!['foto_profile'],
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.person,
+                                size: 40,
+                                color: Colors.blue,
+                              );
+                            },
+                          ),
+                        )
+                      : Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Colors.blue,
+                        ),
                 ),
                 SizedBox(height: 10),
-                Text(
-                  'Name : bara',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                
+                if (isLoading)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.white30,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Container(
+                        width: 100,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: Colors.white30,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Name : ${userData?['nama_lengkap'] ?? 'User'}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Username : ${userData?['username'] ?? 'user'}',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Role : user',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Text(
-                  'Username : bara',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  'Role : user',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                  ),
-                ),
               ],
             ),
           ),
+          
+          // Menu items
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            leading: Icon(Icons.person),
+            title: Text('Profile'),
+            onTap: () {
+              Navigator.pop(context);
+              // Navigate ke profile page jika ada
+              // Navigator.pushNamed(context, '/profile');
+            },
+          ),
+          
+          ListTile(
+            leading: Icon(Icons.book),
+            title: Text('Materi'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/materi-user');
+            },
+          ),
+          
+          ListTile(
+            leading: Icon(Icons.assignment),
+            title: Text('Soal'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/soal-user');
+            },
+          ),
+          
+          Divider(),
+          
+          ListTile(
+            leading: Icon(Icons.logout, color: Colors.red),
+            title: Text(
+              'Logout', 
+              style: TextStyle(color: Colors.red),
+            ),
             onTap: () {
               Navigator.pop(context);
               _showLogoutDialog(context);
@@ -79,16 +221,67 @@ class SidebarUser extends StatelessWidget {
               },
             ),
             TextButton(
-              child: Text('Logout'),
-              onPressed: () {
+              child: Text(
+                'Logout',
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: () async {
                 Navigator.of(context).pop();
-                // Implementasi logout logic
-                // Navigator.pushReplacementNamed(context, '/login');
+                await _performLogout(context);
               },
             ),
           ],
         );
       },
     );
+  }
+
+  Future<void> _performLogout(BuildContext context) async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF664f9f)),
+              ),
+              SizedBox(width: 20),
+              Text('Logging out...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // Call logout API
+      final response = await ApiService.logout();
+      
+      // Close loading dialog
+      Navigator.of(context).pop();
+      
+      // Navigate ke login dengan argumen logout success
+      Navigator.pushNamedAndRemoveUntil(
+        context, 
+        '/login', 
+        (route) => false,
+        arguments: 'logout_success',
+      );
+      
+    } catch (e) {
+      // Close loading dialog
+      Navigator.of(context).pop();
+      
+      // Still navigate to login even if API call fails
+      Navigator.pushNamedAndRemoveUntil(
+        context, 
+        '/login', 
+        (route) => false,
+        arguments: 'logout_success',
+      );
+    }
   }
 }

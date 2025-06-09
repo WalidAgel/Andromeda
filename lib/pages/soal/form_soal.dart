@@ -7,10 +7,10 @@ class TambahSoalPage extends StatefulWidget {
   final Map<String, dynamic>? existingSoal;
   
   const TambahSoalPage({
-    Key? key,
+    super.key,
     this.isEdit = false,
     this.existingSoal,
-  }) : super(key: key);
+  });
 
   @override
   _TambahSoalPageState createState() => _TambahSoalPageState();
@@ -293,14 +293,6 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _simpanSoal,
-                child: Text(
-                  'Tambah',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -308,6 +300,14 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   elevation: 0,
+                ),
+                child: Text(
+                  'Tambah',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),

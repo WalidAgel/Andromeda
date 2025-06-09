@@ -5,9 +5,9 @@ class DetailSoalPage extends StatelessWidget {
   final Map<String, dynamic> soal;
   
   const DetailSoalPage({
-    Key? key,
+    super.key,
     required this.soal,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

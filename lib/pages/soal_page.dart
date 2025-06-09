@@ -6,7 +6,7 @@ import '../widget/soal_card.dart';
 import '../widget/sidebar.dart';
 
 class SoalPage extends StatefulWidget {
-  const SoalPage({Key? key}) : super(key: key);
+  const SoalPage({super.key});
 
   @override
   _SoalPageState createState() => _SoalPageState();
