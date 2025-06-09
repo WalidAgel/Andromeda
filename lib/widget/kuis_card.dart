@@ -110,7 +110,7 @@ class KuisCard extends StatelessWidget {
           ),
           
           // Actions section
-          PopupMenuButton<String>(
+           PopupMenuButton<String>(
             onSelected: (String result) {
               switch (result) {
                 case 'detail':
@@ -124,13 +124,16 @@ class KuisCard extends StatelessWidget {
                   break;
               }
             },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               const PopupMenuItem<String>(
                 value: 'detail',
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 20),
-                    SizedBox(width: 8),
+                    Icon(Icons.info_outline, size: 20, color: Colors.blue),
+                    SizedBox(width: 12),
                     Text('Lihat Detail'),
                   ],
                 ),
@@ -139,26 +142,31 @@ class KuisCard extends StatelessWidget {
                 value: 'edit',
                 child: Row(
                   children: [
-                    Icon(Icons.edit_outlined, size: 20),
-                    SizedBox(width: 8),
+                    Icon(Icons.edit_outlined, size: 20, color: Colors.orange),
+                    SizedBox(width: 12),
                     Text('Edit'),
                   ],
                 ),
               ),
+              const PopupMenuDivider(),
               const PopupMenuItem<String>(
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete, size: 20, color: Colors.red),
-                    SizedBox(width: 8),
+                    Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                    SizedBox(width: 12),
                     Text('Hapus', style: TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
             ],
-            child: const Icon(
-              Icons.more_vert,
-              color: Colors.grey,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                Icons.more_vert,
+                color: Colors.grey[600],
+                size: 20,
+              ),
             ),
           ),
         ],
