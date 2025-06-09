@@ -482,19 +482,42 @@ static Future<List<Map<String, dynamic>>> getKuisList() async {
   }
 
   // Utility Methods
-  static Future<bool> isLoggedIn() async {
-    final token = await getToken();
-    return token != null && token.isNotEmpty;
+ static Future<bool> isLoggedIn() async {
+    try {
+      final token = await getToken();
+      final userType = await getUserType();
+      return token != null && token.isNotEmpty && userType != null;
+    } catch (e) {
+      return false;
+    }
   }
 
   static Future<bool> isAdmin() async {
-    final userType = await getUserType();
-    return userType == 'admin';
+    try {
+      final userType = await getUserType();
+      final isLoggedIn = await ApiService.isLoggedIn();
+      return isLoggedIn && userType == 'admin';
+    } catch (e) {
+      return false;
+    }
+  }
+ static Future<bool> isUser() async {
+    try {
+      final userType = await getUserType();
+      final isLoggedIn = await ApiService.isLoggedIn();
+      return isLoggedIn && userType == 'user';
+    } catch (e) {
+      return false;
+    }
   }
 
-  static Future<bool> isUser() async {
-    final userType = await getUserType();
-    return userType == 'user';
+   static Future<void> clearAllData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+    } catch (e) {
+      print('Error clearing data: $e');
+    }
   }
 
   // Test connection to backend

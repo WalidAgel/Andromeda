@@ -84,15 +84,47 @@ class Sidebar extends StatelessWidget {
             TextButton(
               child: const Text('Logout'),
               onPressed: () async {
-                Navigator.of(context).pop(); // Tutup dialog konfirmasi
+                // Simpan context reference sebelum async operations
+                final navigator = Navigator.of(context);
+                
+                navigator.pop(); // Tutup dialog konfirmasi
+                
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                );
+
                 try {
                   await ApiService.logout();
-                } catch (_) {}
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/login',
-                  (route) => false,
-                  arguments: 'logout_success',
-                );
+                } catch (e) {
+                  print('Logout error: $e');
+                }
+                
+                // Tutup loading dialog
+                navigator.pop();
+                
+                try {
+                  // Navigate to login dan clear semua stack
+                  navigator.pushNamedAndRemoveUntil(
+                    '/login',
+                    (route) => false,
+                    arguments: 'logout_success',
+                  );
+                } catch (e) {
+                  print('Navigation error: $e');
+                  // Jika gagal navigasi normal, coba dengan pushReplacementNamed
+                  try {
+                    navigator.pushReplacementNamed('/login', arguments: 'logout_success');
+                  } catch (e2) {
+                    print('Fallback navigation error: $e2');
+                  }
+                }
               },
             ),
           ],
@@ -101,3 +133,5 @@ class Sidebar extends StatelessWidget {
     );
   }
 }
+
+// File: lib/widget/soal_user.dart

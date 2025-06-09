@@ -39,14 +39,34 @@ class _SplashPageState extends State<SplashPage>
     _checkLogin();
   }
 
+// Updated _checkLogin method in SplashPage
   Future<void> _checkLogin() async {
     await Future.delayed(const Duration(seconds: 3));
-    final token = await ApiService.getToken();
-    if (token != null && token.isNotEmpty) {
-      // Lanjut ke halaman utama
-      Navigator.pushReplacementNamed(context, '/user-choice');
-    } else {
-      // Ke halaman login
+
+    try {
+      final isLoggedIn = await ApiService.isLoggedIn();
+
+      if (isLoggedIn) {
+        final userType = await ApiService.getUserType();
+
+        if (userType == 'admin') {
+          Navigator.pushReplacementNamed(context, '/admin-dashboard');
+        } else if (userType == 'user') {
+          Navigator.pushReplacementNamed(context, '/user-choice');
+        } else {
+          // Invalid user type, clear data and go to login
+          await ApiService.clearAllData();
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      } else {
+        // Not logged in, clear any stale data and go to login
+        await ApiService.clearAllData();
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } catch (e) {
+      print('Auth check error: $e');
+      // On error, clear data and go to login
+      await ApiService.clearAllData();
       Navigator.pushReplacementNamed(context, '/login');
     }
   }

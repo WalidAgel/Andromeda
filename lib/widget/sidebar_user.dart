@@ -225,7 +225,7 @@ class _SidebarUserState extends State<SidebarUser> {
                 style: TextStyle(color: Colors.red),
               ),
               onPressed: () async {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Tutup dialog
                 await _performLogout(context);
               },
             ),
@@ -237,13 +237,43 @@ class _SidebarUserState extends State<SidebarUser> {
 
   Future<void> _performLogout(BuildContext context) async {
     try {
+      // Show loading dengan rootNavigator untuk bisa dismiss dengan aman
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => WillPopScope(
+          onWillPop: () async => false,
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+      );
+
+      // Lakukan logout
       await ApiService.logout();
-    } catch (_) {}
-    if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      '/login',
-      (route) => false,
-      arguments: 'logout_success',
-    );
+      
+      // Tutup loading dialog
+      Navigator.of(context, rootNavigator: true).pop();
+      
+      // Navigate ke login
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
+        arguments: 'logout_success',
+      );
+      
+    } catch (e) {
+      print('Logout error: $e');
+      
+      // Pastikan loading dialog ditutup
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      
+      // Tetap navigate ke login meskipun ada error
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
+        arguments: 'logout_success',
+      );
+    }
   }
 }
