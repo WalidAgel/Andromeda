@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
             builder: (context) => DetailKuisUser(kuisData: kuisData),
           );
         }
-        
+
         // Handle quiz taking route
         if (settings.name?.startsWith('/mengerjakan-kuis/') == true) {
           final kuisData = settings.arguments as Map<String, dynamic>;
@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
             builder: (context) => MengerjakanKuisPage(kuisData: kuisData),
           );
         }
-        
+
         // Default fallback
         return MaterialPageRoute(
           builder: (context) => const SplashPage(),
