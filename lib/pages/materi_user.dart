@@ -274,7 +274,7 @@ class _MateriUserState extends State<MateriUser> {
           final title = materi['judul'] ?? '';
           final description = materi['konten_materi'] ?? '';
           final date = _formatDate(materi['created_at']);
-          final id = materi['id']?.toString() ?? '';
+          // final id = materi['id']?.toString() ?? '';
           final icon = _getIconForMateri(title);
           final backgroundColor = _getColorForMateri(title);
 
@@ -338,22 +338,22 @@ class _MateriUserState extends State<MateriUser> {
                             const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: backgroundColor?.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'ID: $id',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: backgroundColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
+                      // Container(
+                      //   padding: const EdgeInsets.symmetric(
+                      //       horizontal: 8, vertical: 2),
+                      //   decoration: BoxDecoration(
+                      //     color: backgroundColor?.withOpacity(0.1),
+                      //     borderRadius: BorderRadius.circular(12),
+                      //   ),
+                      //   child: Text(
+                      //     'ID: $id',
+                      //     style: TextStyle(
+                      //       fontSize: 10,
+                      //       color: backgroundColor,
+                      //       fontWeight: FontWeight.w500,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 12),

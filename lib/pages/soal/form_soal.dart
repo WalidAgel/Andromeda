@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:haloo/services/api_services.dart';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class TambahSoalPage extends StatefulWidget {
   final bool isEdit;
@@ -143,6 +145,36 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
     });
   }
 
+  Future<String?> _saveImageToLocal(File imageFile) async {
+  try {
+    // Dapatkan direktori aplikasi
+    final appDir = await getApplicationDocumentsDirectory();
+    
+    // Buat direktori images jika belum ada
+    final imagesDir = Directory('${appDir.path}/images');
+    if (!await imagesDir.exists()) {
+      await imagesDir.create(recursive: true);
+    }
+    
+    // Generate nama file unik
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final extension = path.extension(imageFile.path);
+    final fileName = 'soal_${timestamp}$extension';
+    
+    // Path file tujuan
+    final savedImagePath = '${imagesDir.path}/$fileName';
+    
+    // Copy file ke direktori images
+    await imageFile.copy(savedImagePath);
+    
+    // Return URL relatif
+    return './images/$fileName';
+  } catch (e) {
+    print('Error saving image: $e');
+    return null;
+  }
+}
+
   void _showMessage(String message, {bool isError = false}) {
     if (!mounted) return;
     
@@ -207,14 +239,20 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
         'jawaban_benar': _jawabanBenar,
       };
 
-      // Handle file uploads if needed (untuk future implementation)
+          // Handle image upload
       if (_selectedImage != null) {
-        // TODO: Upload image and get URL
-        // soalData['gambar'] = uploadedImageUrl;
-      }
+        final savedImageUrl = await _saveImageToLocal(_selectedImage!);
+        if (savedImageUrl != null) {
+          soalData['gambar'] = savedImageUrl;
+        } else {
+          _showMessage('Gagal menyimpan gambar', isError: true);
+          setState(() => _isLoading = false);
+          return;
+        }
+}
 
       if (_selectedVideo != null) {
-        // TODO: Upload video and get URL
+        // TODO: Upload video and get URL 
         // soalData['video'] = uploadedVideoUrl;
       }
 

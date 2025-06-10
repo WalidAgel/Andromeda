@@ -87,7 +87,9 @@ class _SidebarUserState extends State<SidebarUser> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  isLoading ? 'Loading...' : 'Name : ${userData?['nama_lengkap'] ?? 'User'}',
+                  isLoading
+                      ? 'Loading...'
+                      : 'Name : ${userData?['nama_lengkap'] ?? 'User'}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -95,7 +97,9 @@ class _SidebarUserState extends State<SidebarUser> {
                   ),
                 ),
                 Text(
-                  isLoading ? '' : 'Username : ${userData?['username'] ?? 'user'}',
+                  isLoading
+                      ? ''
+                      : 'Username : ${userData?['username'] ?? 'user'}',
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
@@ -137,14 +141,6 @@ class _SidebarUserState extends State<SidebarUser> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Profile'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/user-profile');
-            },
-          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
@@ -178,9 +174,9 @@ class _SidebarUserState extends State<SidebarUser> {
               onPressed: () async {
                 // Simpan context reference sebelum async operations
                 final navigator = Navigator.of(context);
-                
+
                 navigator.pop(); // Tutup dialog konfirmasi
-                
+
                 // Show loading indicator
                 showDialog(
                   context: context,
@@ -197,10 +193,10 @@ class _SidebarUserState extends State<SidebarUser> {
                 } catch (e) {
                   print('Logout error: $e');
                 }
-                
+
                 // Tutup loading dialog
                 navigator.pop();
-                
+
                 try {
                   // Navigate to login dan clear semua stack
                   navigator.pushNamedAndRemoveUntil(
@@ -212,7 +208,8 @@ class _SidebarUserState extends State<SidebarUser> {
                   print('Navigation error: $e');
                   // Jika gagal navigasi normal, coba dengan pushReplacementNamed
                   try {
-                    navigator.pushReplacementNamed('/login', arguments: 'logout_success');
+                    navigator.pushReplacementNamed('/login',
+                        arguments: 'logout_success');
                   } catch (e2) {
                     print('Fallback navigation error: $e2');
                   }
