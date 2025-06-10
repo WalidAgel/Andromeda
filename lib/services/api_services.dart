@@ -362,6 +362,7 @@ class ApiService {
   }
 
   // Tambah soal (POST)
+
   static Future<ApiResponse> addSoal(Map<String, dynamic> soalData) async {
     return await _makeRequest(
       method: 'POST',
@@ -370,6 +371,7 @@ class ApiService {
       requiresAuth: true,
     );
   }
+
 
   // Update soal (PUT)
   static Future<ApiResponse> updateSoal(
@@ -457,7 +459,66 @@ static Future<List<Map<String, dynamic>>> getKuisList() async {
   }
   return null;
 }
-  
+
+static Future<ApiResponse> getKuisUser() async {
+  return await _makeRequest(
+    method: 'GET',
+    url: '/user/kuis',
+    requiresAuth: true,
+  );
+}
+
+static Future<ApiResponse> getKuisUserById(int id) async {
+  return await _makeRequest(
+    method: 'GET',
+    url: '/user/kuis/$id',
+    requiresAuth: true,
+  );
+}
+
+static Future<ApiResponse> startQuiz(int kuisId) async {
+  return await _makeRequest(
+    method: 'POST',
+    url: '/user/kuis/$kuisId/start',
+    requiresAuth: true,
+  );
+}
+
+static Future<ApiResponse> submitAnswer({
+  required int kuisId,
+  required int soalId,
+  required String jawabanUser,
+}) async {
+  return await _makeRequest(
+    method: 'POST',
+    url: '/user/kuis/$kuisId/submit',
+    body: {
+      'soal_id': soalId,
+      'jawaban_user': jawabanUser,
+    },
+    requiresAuth: true,
+  );
+}
+
+static Future<ApiResponse> getQuizResult(int kuisId) async {
+  return await _makeRequest(
+    method: 'GET',
+    url: '/user/kuis/$kuisId/result',
+    requiresAuth: true,
+  );
+}
+
+// Method untuk cek apakah user sudah mengerjakan kuis
+static Future<ApiResponse> checkQuizStatus(int kuisId) async {
+  return await _makeRequest(
+    method: 'GET',
+    url: '/user/kuis/$kuisId/status',
+    requiresAuth: true,
+  );
+}
+
+// Helper method untuk validasi jawaban
+// (Duplicate removed)
   static Future<ApiResponse> getKuisById(int id) async {
     final userType = await getUserType();
     final endpoint = userType == 'admin' ? '/admin/kuis/$id' : '/user/kuis/$id';
@@ -540,6 +601,30 @@ static Future<List<Map<String, dynamic>>> getKuisList() async {
       return false;
     }
   }
+
+  // Tambahkan method-method berikut ke dalam class ApiService yang sudah ada
+// File: lib/services/api_services.dart
+
+// Quiz User Methods - Tambahkan di bagian akhir class ApiService sebelum closing bracket
+
+// Get kuis untuk user
+
+// Helper method untuk validasi jawaban
+static bool isValidJawaban(String jawaban) {
+  return ['A', 'B', 'C', 'D'].contains(jawaban.toUpperCase());
+}
+
+// Method untuk format skor
+static String formatSkor(dynamic skor) {
+  if (skor == null) return '0';
+  if (skor is String) {
+    return skor;
+  }
+  if (skor is num) {
+    return skor.toStringAsFixed(1);
+  }
+  return skor.toString();
+}
 }
 
 // Simple Response Model
@@ -560,4 +645,6 @@ class ApiResponse {
   String toString() {
     return 'ApiResponse(success: $success, message: $message, statusCode: $statusCode)';
   }
+
+  
 }

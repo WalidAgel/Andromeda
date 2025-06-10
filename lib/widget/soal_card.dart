@@ -17,152 +17,6 @@ class SoalCard extends StatelessWidget {
     required this.data,
   });
 
-  void _showImageDialog(BuildContext context, Map<String, dynamic> soal) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.6,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                // Header dialog
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          soal['title']?.isNotEmpty == true 
-                              ? soal['title'] 
-                              : soal['judul'] ?? 'Preview Gambar',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                        constraints: const BoxConstraints(),
-                        padding: EdgeInsets.zero,
-                      ),
-                    ],
-                  ),
-                ),
-                // Gambar besar atau default illustration
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.blue[300]!,
-                          Colors.blue[400]!,
-                        ],
-                      ),
-                    ),
-                    child: soal['gambar'] != null && soal['gambar'].toString().isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              soal['gambar'],
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return _buildDefaultIllustration(false);
-                              },
-                            ),
-                          )
-                        : _buildDefaultIllustration(false),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDefaultIllustration(bool isSmall) {
-    double scale = isSmall ? 0.7 : 1.0;
-    
-    return Stack(
-      children: [
-        // Background pattern
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(isSmall ? 10 : 12),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue[300]!,
-                  Colors.blue[400]!,
-                ],
-              ),
-            ),
-          ),
-        ),
-        // Question mark icon
-        Center(
-          child: Icon(
-            Icons.quiz_outlined,
-            size: isSmall ? 24 : 80,
-            color: Colors.white,
-          ),
-        ),
-        // Decorative elements
-        Positioned(
-          top: 15 * scale,
-          left: 15 * scale,
-          child: Container(
-            width: 20 * scale,
-            height: 10 * scale,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 20 * scale,
-          right: 20 * scale,
-          child: Container(
-            width: 25 * scale,
-            height: 12 * scale,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ApiResponse>(
@@ -176,6 +30,7 @@ class SoalCard extends StatelessWidget {
             ),
           );
         }
+
         if (!snapshot.hasData || snapshot.hasError || snapshot.data?.data == null) {
           return const Card(
             child: Padding(
@@ -184,159 +39,133 @@ class SoalCard extends StatelessWidget {
             ),
           );
         }
+
         final soal = snapshot.data!.data as Map<String, dynamic>;
+        
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.blue[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: soal['gambar'] != null && soal['gambar'].toString().isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        soal['gambar'],
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.quiz_outlined,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.quiz_outlined,
+                      color: Colors.blue,
+                    ),
+            ),
+            title: Text(
+              soal['judul'] ?? 'Soal Baru',
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Clickable image/icon
-                GestureDetector(
-                  onTap: () => _showImageDialog(context, soal),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.blue[100]!,
-                        width: 1,
-                      ),
-                    ),
-                    child: soal['gambar'] != null && soal['gambar'].toString().isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(9),
-                            child: Image.network(
-                              soal['gambar'],
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return _buildDefaultIllustration(true);
-                              },
-                            ),
-                          )
-                        : _buildDefaultIllustration(true),
+                const SizedBox(height: 4),
+                Text(
+                  soal['pertanyaan'] ?? '',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 13,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        soal['title']?.isNotEmpty == true 
-                            ? soal['title'] 
-                            : soal['judul'] ?? 'Soal Baru',
-                        style: const TextStyle(
-                          fontSize: 16,
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.green[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.green[200]!),
+                      ),
+                      child: Text(
+                        'Jawaban: ${soal['jawaban_benar'] ?? 'A'}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.green[700],
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                          letterSpacing: -0.2,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'Jenis: ${soal['category']?.isNotEmpty == true ? soal['category'] : "Umum"}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 12,
-                            color: Colors.grey[500],
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            soal['date']?.isNotEmpty == true 
-                                ? soal['date'] 
-                                : _getCurrentDate(),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                // 3 dots popup menu
-                PopupMenuButton<String>(
-                  onSelected: (String result) {
-                    switch (result) {
-                      case 'detail':
-                        onDetail();
-                        break;
-                      case 'edit':
-                        onEdit();
-                        break;
-                      case 'delete':
-                        onDelete();
-                        break;
-                    }
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                    const PopupMenuItem<String>(
-                      value: 'detail',
-                      child: Row(
-                        children: [
-                          Icon(Icons.info_outline, size: 20, color: Colors.blue),
-                          SizedBox(width: 12),
-                          Text('Lihat Detail'),
-                        ],
                       ),
                     ),
-                    const PopupMenuItem<String>(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit_outlined, size: 20, color: Colors.orange),
-                          SizedBox(width: 12),
-                          Text('Edit'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    const PopupMenuItem<String>(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                          SizedBox(width: 12),
-                          Text('Hapus', style: TextStyle(color: Colors.red)),
-                        ],
+                    const Spacer(),
+                    Text(
+                      _formatDate(soal['created_at']),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[500],
                       ),
                     ),
                   ],
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.more_vert,
-                      color: Colors.grey[600],
-                      size: 20,
-                    ),
+                ),
+              ],
+            ),
+            trailing: PopupMenuButton<String>(
+              onSelected: (value) {
+                switch (value) {
+                  case 'detail':
+                    onDetail();
+                    break;
+                  case 'edit':
+                    onEdit();
+                    break;
+                  case 'delete':
+                    onDelete();
+                    break;
+                }
+              },
+              itemBuilder: (_) => [
+                const PopupMenuItem(
+                  value: 'detail',
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Text('Detail'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Hapus'),
+                    ],
                   ),
                 ),
               ],
@@ -347,8 +176,13 @@ class SoalCard extends StatelessWidget {
     );
   }
 
-  String _getCurrentDate() {
-    final now = DateTime.now();
-    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  String _formatDate(String? dateString) {
+    if (dateString == null || dateString.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return dateString.split(' ')[0];
+    }
   }
 }

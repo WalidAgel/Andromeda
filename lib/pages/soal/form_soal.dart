@@ -13,19 +13,18 @@ class TambahSoalPage extends StatefulWidget {
   });
 
   @override
-  _TambahSoalPageState createState() => _TambahSoalPageState();
+  State<TambahSoalPage> createState() => _TambahSoalPageState();
 }
 
 class _TambahSoalPageState extends State<TambahSoalPage> {
-  final TextEditingController _pertanyaanController = TextEditingController();
-  final TextEditingController _opsiAController = TextEditingController();
-  final TextEditingController _opsiBController = TextEditingController();
-  final TextEditingController _opsiCController = TextEditingController();
-  final TextEditingController _opsiDController = TextEditingController();
-  final TextEditingController _judulController = TextEditingController();
-  final TextEditingController _deskripsiController = TextEditingController();
-  final TextEditingController _kategoriController = TextEditingController();
+  final _judulController = TextEditingController();
+  final _pertanyaanController = TextEditingController();
+  final _opsiAController = TextEditingController();
+  final _opsiBController = TextEditingController();
+  final _opsiCController = TextEditingController();
+  final _opsiDController = TextEditingController();
   
+  String _jawabanBenar = 'A';
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
@@ -33,281 +32,140 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
   void initState() {
     super.initState();
     if (widget.isEdit && widget.existingSoal != null) {
-      _loadExistingData();
+      _loadData();
     }
   }
 
-  void _loadExistingData() {
+  void _loadData() {
     final data = widget.existingSoal!;
     _judulController.text = data['judul'] ?? '';
-    _deskripsiController.text = data['deskripsi'] ?? '';
-    _kategoriController.text = data['kategori'] ?? '';
     _pertanyaanController.text = data['pertanyaan'] ?? '';
-    _opsiAController.text = data['opsiA'] ?? '';
-    _opsiBController.text = data['opsiB'] ?? '';
-    _opsiCController.text = data['opsiC'] ?? '';
-    _opsiDController.text = data['opsiD'] ?? '';
-    
-    if (data['imagePath'] != null) {
-      _selectedImage = File(data['imagePath']);
+    _opsiAController.text = data['pilihan_a'] ?? '';
+    _opsiBController.text = data['pilihan_b'] ?? '';
+    _opsiCController.text = data['pilihan_c'] ?? '';
+    _opsiDController.text = data['pilihan_d'] ?? '';
+    _jawabanBenar = data['jawaban_benar'] ?? 'A';
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() => _selectedImage = File(image.path));
     }
   }
 
-  void _showImageSourceDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pilih Sumber Gambar'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _pickImage(ImageSource source) async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-      
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
+  void _submit() {
+    if (_judulController.text.isEmpty || _pertanyaanController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error memilih gambar: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  void _removeImage() {
-    setState(() {
-      _selectedImage = null;
-    });
-  }
-
-  void _simpanSoal() {
-    if (_pertanyaanController.text.isEmpty ||
-        _opsiAController.text.isEmpty ||
-        _opsiBController.text.isEmpty ||
-        _opsiCController.text.isEmpty ||
-        _opsiDController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mohon lengkapi semua field'),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text('Mohon lengkapi data soal')),
       );
       return;
     }
 
-    // Return data to parent page
-    final soalData = {
-      'judul': _judulController.text.isEmpty ? 'Soal Baru' : _judulController.text,
-      'deskripsi': _deskripsiController.text,
-      'kategori': _kategoriController.text.isEmpty ? 'Umum' : _kategoriController.text,
-      'pertanyaan': _pertanyaanController.text,
-      'opsiA': _opsiAController.text,
-      'opsiB': _opsiBController.text,
-      'opsiC': _opsiCController.text,
-      'opsiD': _opsiDController.text,
-      'imagePath': _selectedImage?.path,
+    final data = {
+      'judul': _judulController.text.trim(),
+      'pertanyaan': _pertanyaanController.text.trim(),
+      'pilihan_a': _opsiAController.text.trim(),
+      'pilihan_b': _opsiBController.text.trim(),
+      'pilihan_c': _opsiCController.text.trim(),
+      'pilihan_d': _opsiDController.text.trim(),
+      'jawaban_benar': _jawabanBenar,
+      if (_selectedImage != null) 'imagePath': _selectedImage!.path,
     };
 
-    Navigator.pop(context, soalData);
+    Navigator.pop(context, data);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: Text(widget.isEdit ? 'Edit Soal' : 'Tambah Soal'),
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Tambah Soal',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        centerTitle: false,
+        foregroundColor: Colors.black,
+        elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Field Pertanyaan
-            _buildSimpleTextField('Pertanyaan', _pertanyaanController),
+            // Judul
+            _buildTextField('Judul', _judulController),
+            const SizedBox(height: 16),
             
-            const SizedBox(height: 20),
-
-            // Field Opsi A
-            _buildSimpleTextField('Opsi A', _opsiAController),
+            // Pertanyaan
+            _buildTextField('Pertanyaan', _pertanyaanController, maxLines: 3),
+            const SizedBox(height: 16),
             
-            const SizedBox(height: 20),
-
-            // Field Opsi B
-            _buildSimpleTextField('Opsi B', _opsiBController),
-            
-            const SizedBox(height: 20),
-
-            // Field Opsi C
-            _buildSimpleTextField('Opsi C', _opsiCController),
-            
-            const SizedBox(height: 20),
-
-            // Field Opsi D
-            _buildSimpleTextField('Opsi D', _opsiDController),
-
-            const SizedBox(height: 30),
-
-            // Section Gambar Kuis
-            const Text(
-              'Gambar Kuis',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
+            // Pilihan A-D
+            _buildTextField('Opsi A', _opsiAController),
             const SizedBox(height: 12),
+            _buildTextField('Opsi B', _opsiBController),
+            const SizedBox(height: 12),
+            _buildTextField('Opsi C', _opsiCController),
+            const SizedBox(height: 12),
+            _buildTextField('Opsi D', _opsiDController),
+            const SizedBox(height: 16),
             
+            // Jawaban Benar
             Row(
               children: [
-                // Tombol Pilih Gambar
-                ElevatedButton.icon(
-                  onPressed: _showImageSourceDialog,
-                  icon: const Icon(Icons.image, size: 18),
-                  label: const Text('Pilih Gambar'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: const Color(0xFF664f9f),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(width: 15),
-                
-                // Preview Gambar
-                GestureDetector(
-                  onTap: _selectedImage != null ? _removeImage : _showImageSourceDialog,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      border: Border.all(
-                        color: _selectedImage != null ? Colors.indigo : Colors.grey[300]!,
-                        width: _selectedImage != null ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: _selectedImage != null
-                        ? Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.file(
-                                  _selectedImage!,
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: GestureDetector(
-                                  onTap: _removeImage,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                      size: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : const Icon(
-                            Icons.image,
-                            size: 32,
-                            color: Colors.grey,
-                          ),
-                  ),
+                const Text('Jawaban Benar: '),
+                DropdownButton<String>(
+                  value: _jawabanBenar,
+                  items: ['A', 'B', 'C', 'D'].map((e) => 
+                    DropdownMenuItem(value: e, child: Text('Opsi $e'))
+                  ).toList(),
+                  onChanged: (v) => setState(() => _jawabanBenar = v!),
                 ),
               ],
             ),
             
-            const SizedBox(height: 40),
-
-            // Tombol Tambah
+            const SizedBox(height: 24),
+            
+            // Gambar
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _pickImage,
+                  icon: const Icon(Icons.image),
+                  label: const Text('Pilih Gambar'),
+                ),
+                const SizedBox(width: 16),
+                if (_selectedImage != null) ...[
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: FileImage(_selectedImage!),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => setState(() => _selectedImage = null),
+                    icon: const Icon(Icons.close, color: Colors.red),
+                  ),
+                ],
+              ],
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Submit Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _simpanSoal,
+                onPressed: _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
                 ),
-                child: const Text(
-                  'Tambah',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                child: Text(
+                  widget.isEdit ? 'Update' : 'Tambah',
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
@@ -317,32 +175,21 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
     );
   }
 
-  Widget _buildSimpleTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(String label, TextEditingController controller, {int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          decoration: InputDecoration(
-            border: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.deepPurple, width: 2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          maxLines: maxLines,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.all(12),
           ),
         ),
       ],
@@ -351,14 +198,12 @@ class _TambahSoalPageState extends State<TambahSoalPage> {
 
   @override
   void dispose() {
+    _judulController.dispose();
     _pertanyaanController.dispose();
     _opsiAController.dispose();
     _opsiBController.dispose();
     _opsiCController.dispose();
     _opsiDController.dispose();
-    _judulController.dispose();
-    _deskripsiController.dispose();
-    _kategoriController.dispose();
     super.dispose();
   }
 }

@@ -70,131 +70,65 @@ class _SidebarUserState extends State<SidebarUser> {
         children: [
           DrawerHeader(
             margin: EdgeInsets.zero,
-            decoration: BoxDecoration(
-              color: Colors.purple[700],
+            decoration: const BoxDecoration(
+              color: Color(0xFF664f9f),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: userData?['foto_profile'] != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: Image.network(
-                            userData!['foto_profile'],
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.person,
-                                size: 40,
-                                color: Colors.blue,
-                              );
-                            },
-                          ),
-                        )
-                      : const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.blue,
-                        ),
+                  child: Icon(
+                    Icons.person,
+                    size: 40,
+                    color: Color(0xFF664f9f),
+                  ),
                 ),
                 const SizedBox(height: 10),
-                if (isLoading)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: Colors.white30,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 100,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          color: Colors.white30,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Name : ${userData?['nama_lengkap'] ?? 'User'}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Username : ${userData?['username'] ?? 'user'}',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const Text(
-                        'Role : user',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                Text(
+                  isLoading ? 'Loading...' : 'Name : ${userData?['nama_lengkap'] ?? 'User'}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+                Text(
+                  isLoading ? '' : 'Username : ${userData?['username'] ?? 'user'}',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+                const Text(
+                  'Role : user',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
-
-          // Menu items
           ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Profile'),
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate ke profile page jika ada
-              // Navigator.pushNamed(context, '/profile');
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.book),
+            leading: const Icon(Icons.menu_book),
             title: const Text('Materi'),
             onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/materi-user');
+              Navigator.of(context).pushReplacementNamed('/materi-user');
             },
           ),
-
           ListTile(
-            leading: const Icon(Icons.assignment),
-            title: const Text('Soal'),
+            leading: const Icon(Icons.assignment_turned_in),
+            title: const Text('Daftar Kuis'),
             onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/soal-user');
+              Navigator.of(context).pushReplacementNamed('/kuis-user');
             },
           ),
-
           const Divider(),
-
           ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
-            ),
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
             onTap: () {
               Navigator.pop(context);
               _showLogoutDialog(context);
@@ -220,60 +154,54 @@ class _SidebarUserState extends State<SidebarUser> {
               },
             ),
             TextButton(
-              child: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Logout'),
               onPressed: () async {
-                Navigator.of(context).pop(); // Tutup dialog
-                await _performLogout(context);
+                // Simpan context reference sebelum async operations
+                final navigator = Navigator.of(context);
+                
+                navigator.pop(); // Tutup dialog konfirmasi
+                
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                );
+
+                try {
+                  await ApiService.logout();
+                } catch (e) {
+                  print('Logout error: $e');
+                }
+                
+                // Tutup loading dialog
+                navigator.pop();
+                
+                try {
+                  // Navigate to login dan clear semua stack
+                  navigator.pushNamedAndRemoveUntil(
+                    '/login',
+                    (route) => false,
+                    arguments: 'logout_success',
+                  );
+                } catch (e) {
+                  print('Navigation error: $e');
+                  // Jika gagal navigasi normal, coba dengan pushReplacementNamed
+                  try {
+                    navigator.pushReplacementNamed('/login', arguments: 'logout_success');
+                  } catch (e2) {
+                    print('Fallback navigation error: $e2');
+                  }
+                }
               },
             ),
           ],
         );
       },
     );
-  }
-
-  Future<void> _performLogout(BuildContext context) async {
-    try {
-      // Show loading dengan rootNavigator untuk bisa dismiss dengan aman
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => WillPopScope(
-          onWillPop: () async => false,
-          child: const Center(child: CircularProgressIndicator()),
-        ),
-      );
-
-      // Lakukan logout
-      await ApiService.logout();
-      
-      // Tutup loading dialog
-      Navigator.of(context, rootNavigator: true).pop();
-      
-      // Navigate ke login
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/login',
-        (route) => false,
-        arguments: 'logout_success',
-      );
-      
-    } catch (e) {
-      print('Logout error: $e');
-      
-      // Pastikan loading dialog ditutup
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-      
-      // Tetap navigate ke login meskipun ada error
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/login',
-        (route) => false,
-        arguments: 'logout_success',
-      );
-    }
   }
 }

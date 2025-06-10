@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:haloo/pages/materi_user.dart';
-import 'package:haloo/pages/soal_user.dart';
-
+import 'package:haloo/pages/kuis_user.dart'; // Ganti ke halaman kuis user
 
 class MainScreenUser extends StatefulWidget {
   const MainScreenUser({super.key});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _MainScreenUserState createState() => _MainScreenUserState();
 }
 
-class _MainScreenState extends State<MainScreenUser> {
+class _MainScreenUserState extends State<MainScreenUser> {
   int _selectedIndex = 0;
 
-  // List halaman yang akan ditampilkan
   final List<Widget> _pages = [
-    // MateriUser(),
-    // SoalUser(),
+    MateriUser(),
+    KuisUser(), // Halaman daftar kuis user
   ];
 
   void _onItemTapped(int index) {
@@ -30,21 +28,21 @@ class _MainScreenState extends State<MainScreenUser> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF664f9f), // Warna latar BottomNavigationBar
-        selectedItemColor: Colors.white, // Warna ikon dan label saat aktif
-        unselectedItemColor: Colors.white70, // Warna ikon dan label saat tidak aktif
+        backgroundColor: const Color(0xFF664f9f),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.menu_book),
             label: 'Materi',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.help_outline),
-            label: 'Soal',
+            icon: Icon(Icons.assignment_turned_in),
+            label: 'Kuis',
           ),
         ],
-        currentIndex: _selectedIndex, // Gunakan _selectedIndex, bukan hardcode 0
-        onTap: _onItemTapped, // Panggil fungsi _onItemTapped
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

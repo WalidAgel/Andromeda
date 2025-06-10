@@ -1,4 +1,4 @@
-// File: lib/main.dart
+// File: lib/main.dart (Updated with new routes)
 import 'package:flutter/material.dart';
 import 'pages/splash_page.dart';
 import 'pages/login.dart';
@@ -7,7 +7,9 @@ import 'pages/user_choice_page.dart';
 import 'pages/materi_user.dart';
 import 'pages/soal_user.dart';
 import 'widget/tabBar.dart';
-
+import 'pages/kuis_user.dart';
+import 'pages/kuis/detail_kuis_user.dart';
+import 'pages/kuis/mengerjakan_kuis.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +37,30 @@ class MyApp extends StatelessWidget {
         '/user-choice': (context) => const UserChoicePage(),
         '/admin-dashboard': (context) => const MainScreen(),
         '/materi-user': (context) => const MateriUser(),
-        '/soal-user': (context) => const SoalUser(),
+        '/kuis-user': (context) => const KuisUser(),
+      },
+      // Handle dynamic routes for quiz detail and quiz taking
+      onGenerateRoute: (settings) {
+        // Handle quiz detail route
+        if (settings.name?.startsWith('/detail-kuis-user/') == true) {
+          final kuisData = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => DetailKuisUser(kuisData: kuisData),
+          );
+        }
+        
+        // Handle quiz taking route
+        if (settings.name?.startsWith('/mengerjakan-kuis/') == true) {
+          final kuisData = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => MengerjakanKuisPage(kuisData: kuisData),
+          );
+        }
+        
+        // Default fallback
+        return MaterialPageRoute(
+          builder: (context) => const SplashPage(),
+        );
       },
       // Tambahkan ini untuk handle unknown routes
       onUnknownRoute: (settings) {

@@ -113,7 +113,7 @@ class _MateriUserState extends State<MateriUser> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetailUser(materi: materi),
+        builder: (context) => DetailUser(materiId: materi['id']),
       ),
     );
   }
