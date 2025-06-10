@@ -1,4 +1,4 @@
-// File: pages/kuis_page.dart
+// File: lib/pages/kuis_page.dart - Improved CRUD Operations
 import 'package:flutter/material.dart';
 import 'package:haloo/pages/kuis/form_kuis.dart';
 import 'package:haloo/pages/kuis/detail_kuis.dart';
@@ -17,6 +17,7 @@ class _KuisPageState extends State<KuisPage> {
   List<Map<String, dynamic>> kuisList = [];
   bool isLoading = true;
   String? errorMessage;
+  bool isRefreshing = false;
 
   @override
   void initState() {
@@ -25,10 +26,12 @@ class _KuisPageState extends State<KuisPage> {
   }
 
   Future<void> fetchKuisList() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+    if (!isRefreshing) {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+    }
 
     try {
       final response = await ApiService.getKuis();
@@ -37,23 +40,67 @@ class _KuisPageState extends State<KuisPage> {
         setState(() {
           kuisList = data.cast<Map<String, dynamic>>();
           isLoading = false;
+          isRefreshing = false;
         });
       } else {
         setState(() {
           errorMessage = response.message;
           isLoading = false;
+          isRefreshing = false;
         });
       }
     } catch (e) {
       setState(() {
         errorMessage = 'Terjadi kesalahan: $e';
         isLoading = false;
+        isRefreshing = false;
       });
     }
   }
 
   Future<void> _refreshData() async {
+    setState(() {
+      isRefreshing = true;
+    });
     await fetchKuisList();
+  }
+
+  void _showMessage(String message, {bool isError = false}) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 20),
+            Text('Processing...'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _hideLoadingDialog() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -61,12 +108,12 @@ class _KuisPageState extends State<KuisPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Kuis Admin',
+          'Manajemen Kuis',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 0,
+        elevation: 1,
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -75,18 +122,28 @@ class _KuisPageState extends State<KuisPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshData,
+            icon: Icon(
+              isRefreshing ? Icons.hourglass_empty : Icons.refresh,
+              color: isRefreshing ? Colors.grey : Colors.black,
+            ),
+            onPressed: isRefreshing ? null : _refreshData,
             tooltip: 'Refresh Data',
           ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _navigateToAddKuis(context),
+            tooltip: 'Tambah Kuis',
           ),
         ],
       ),
       drawer: const Sidebar(),
       body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToAddKuis(context),
+        backgroundColor: const Color(0xFF664f9f),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -179,7 +236,7 @@ class _KuisPageState extends State<KuisPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Tap tombol + untuk menambah kuis',
+              'Mulai dengan membuat kuis pertama Anda',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[500],
@@ -193,6 +250,7 @@ class _KuisPageState extends State<KuisPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF664f9f),
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
           ],
@@ -202,6 +260,7 @@ class _KuisPageState extends State<KuisPage> {
 
     return RefreshIndicator(
       onRefresh: _refreshData,
+      color: const Color(0xFF664f9f),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: kuisList.length,
@@ -237,125 +296,42 @@ class _KuisPageState extends State<KuisPage> {
       ),
     );
 
-    if (result != null) {
-      _addNewKuis(result);
-    }
-  }
-
-  // Metode untuk menambah kuis baru via API
-  void _addNewKuis(Map<String, dynamic> kuisData) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-
-    try {
-      final response = await ApiService.tambahKuis(kuisData);
-      
-      Navigator.pop(context); // Close loading
-
-      if (response.success) {
-        await fetchKuisList();
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Kuis berhasil ditambahkan!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Gagal menambah kuis: ${response.message}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      Navigator.pop(context);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    if (result == true) {
+      await fetchKuisList();
     }
   }
 
   // Metode untuk navigasi ke form edit kuis
   void _navigateToEditKuis(BuildContext context, Map<String, dynamic> kuis) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TambahKuisPage(
-          isEdit: true,
-          existingKuis: kuis,
-        ),
-      ),
-    );
-
-    if (result != null) {
-      _updateKuis(kuis['id'], result);
-    }
-  }
-
-  // Metode untuk update kuis via API
-  void _updateKuis(dynamic id, Map<String, dynamic> updatedData) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-
+    // Load detail kuis terlebih dahulu untuk mendapatkan data lengkap
+    _showLoadingDialog();
+    
     try {
-      final response = await ApiService.updateKuis(int.parse(id.toString()), updatedData);
+      final response = await ApiService.getKuisById(kuis['id']);
+      _hideLoadingDialog();
       
-      Navigator.pop(context);
-
-      if (response.success) {
-        await fetchKuisList();
+      if (response.success && response.data != null) {
+        final detailKuis = response.data['data'];
         
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Kuis berhasil diperbarui!'),
-              backgroundColor: Colors.green,
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TambahKuisPage(
+              isEdit: true,
+              existingKuis: detailKuis,
             ),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Gagal memperbarui kuis: ${response.message}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      Navigator.pop(context);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
           ),
         );
+
+        if (result == true) {
+          await fetchKuisList();
+        }
+      } else {
+        _showMessage('Gagal memuat detail kuis: ${response.message}', isError: true);
       }
+    } catch (e) {
+      _hideLoadingDialog();
+      _showMessage('Error: $e', isError: true);
     }
   }
 
@@ -368,15 +344,91 @@ class _KuisPageState extends State<KuisPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Hapus Kuis'),
-          content: Text('Apakah Anda yakin ingin menghapus kuis "${kuis['nama_kuis'] ?? 'Tanpa Nama'}"?'),
+          title: const Row(
+            children: [
+              Icon(Icons.warning, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Hapus Kuis'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Apakah Anda yakin ingin menghapus kuis ini?'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nama Kuis:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      kuis['nama_kuis'] ?? 'Tanpa Nama',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Jumlah Soal: ${_getJumlahSoal(kuis)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.red[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: Colors.red[600]),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Tindakan ini tidak dapat dibatalkan!',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.red[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
               child: const Text('Batal'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Hapus'),
               onPressed: () async {
                 Navigator.of(context).pop();
@@ -389,52 +441,91 @@ class _KuisPageState extends State<KuisPage> {
     );
   }
 
+  int _getJumlahSoal(Map<String, dynamic> kuis) {
+    if (kuis['soal'] != null && kuis['soal'] is List) {
+      return (kuis['soal'] as List).length;
+    }
+    return 0;
+  }
+
   Future<void> _deleteKuisFromApi(Map<String, dynamic> kuis) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+    _showLoadingDialog();
 
     try {
       final response = await ApiService.hapusKuis(int.parse(kuis['id'].toString()));
-      
-      Navigator.pop(context);
+      _hideLoadingDialog();
 
       if (response.success) {
         await fetchKuisList();
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Kuis "${kuis['nama_kuis'] ?? 'Tanpa Nama'}" berhasil dihapus!'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          _showMessage('Kuis "${kuis['nama_kuis'] ?? 'Tanpa Nama'}" berhasil dihapus!');
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Gagal menghapus kuis: ${response.message}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          _showMessage('Gagal menghapus kuis: ${response.message}', isError: true);
         }
       }
     } catch (e) {
-      Navigator.pop(context);
+      _hideLoadingDialog();
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showMessage('Error: $e', isError: true);
       }
     }
+  }
+
+  // Method untuk menampilkan statistik kuis (opsional)
+  Widget _buildKuisStats() {
+    final totalKuis = kuisList.length;
+    final publishedKuis = kuisList.where((k) => k['status'] == 'published').length;
+    final draftKuis = kuisList.where((k) => k['status'] == 'draft').length;
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _buildStatItem('Total', totalKuis.toString(), Colors.blue),
+          _buildStatItem('Published', publishedKuis.toString(), Colors.green),
+          _buildStatItem('Draft', draftKuis.toString(), Colors.orange),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
