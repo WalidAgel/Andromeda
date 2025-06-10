@@ -40,8 +40,9 @@ class MyApp extends StatelessWidget {
         '/admin-dashboard': (context) => const MainScreen(),
         '/user-dashboard': (context) => const MainScreenUser(),
         // '/user-profile': (context) => const UserProfilePage(),
-        '/materi-user': (context) => const MateriUser(),
-        '/kuis-user': (context) => const KuisUser(),
+        // Redirect routes lama ke dashboard utama
+        '/materi-user': (context) => const MainScreenUser(),
+        '/kuis-user': (context) => const MainScreenUser(),
       },
       // Handle dynamic routes for quiz detail and quiz taking
       onGenerateRoute: (settings) {

@@ -115,14 +115,26 @@ class _SidebarUserState extends State<SidebarUser> {
             leading: const Icon(Icons.menu_book),
             title: const Text('Materi'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/user-dashboard');
+              Navigator.pop(context); // Tutup drawer dulu
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/user-dashboard',
+                (route) => false,
+                arguments: {'selectedTab': 0}, // Tab materi
+              );
             },
           ),
           ListTile(
             leading: const Icon(Icons.assignment_turned_in),
             title: const Text('Daftar Kuis'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/user-dashboard');
+              Navigator.pop(context); // Tutup drawer dulu
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/user-dashboard',
+                (route) => false,
+                arguments: {'selectedTab': 1}, // Tab kuis
+              );
             },
           ),
           ListTile(

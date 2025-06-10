@@ -1,6 +1,6 @@
+// File: lib/pages/materi_user.dart (Updated - Remove AppBar)
 import 'package:flutter/material.dart';
 import 'package:haloo/pages/materi/detail_user.dart';
-import 'package:haloo/widget/sidebar_user.dart';
 import 'package:haloo/services/api_services.dart';
 
 class MateriUser extends StatefulWidget {
@@ -120,6 +120,11 @@ class _MateriUserState extends State<MateriUser> {
 
   @override
   Widget build(BuildContext context) {
+    // Redirect to MainScreenUser if accessed directly
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushReplacementNamed(context, '/user-dashboard', arguments: {'selectedTab': 0});
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Daftar Materi"),
@@ -135,7 +140,6 @@ class _MateriUserState extends State<MateriUser> {
           ),
         ],
       ),
-      drawer: const SidebarUser(),
       body: _buildBody(),
     );
   }

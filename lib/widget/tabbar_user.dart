@@ -26,6 +26,20 @@ class _MainScreenUserState extends State<MainScreenUser> {
     'Daftar Kuis',
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    // Check for arguments to set initial tab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map<String, dynamic> && args['selectedTab'] != null) {
+        setState(() {
+          _selectedIndex = args['selectedTab'] as int;
+        });
+      }
+    });
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
