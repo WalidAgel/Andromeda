@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-import 'package:haloo/services/api_services.dart'; 
+import 'package:haloo/services/api_services.dart';
 
 class TambahMateriPage extends StatefulWidget {
   final bool isEdit;
@@ -299,7 +299,7 @@ class _TambahMateriPageState extends State<TambahMateriPage> {
                 ),
                 const SizedBox(height: 25),
                 const Text(
-                  'Gambar Kuis',
+                  'Gambar Materi',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
