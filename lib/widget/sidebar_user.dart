@@ -115,14 +115,22 @@ class _SidebarUserState extends State<SidebarUser> {
             leading: const Icon(Icons.menu_book),
             title: const Text('Materi'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/materi-user');
+              Navigator.of(context).pushReplacementNamed('/user-dashboard');
             },
           ),
           ListTile(
             leading: const Icon(Icons.assignment_turned_in),
             title: const Text('Daftar Kuis'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/kuis-user');
+              Navigator.of(context).pushReplacementNamed('/user-dashboard');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Profile'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/user-profile');
             },
           ),
           const Divider(),

@@ -1,4 +1,4 @@
-// File: lib/main.dart (Updated with new routes)
+// File: lib/main.dart (Updated with TabBar User)
 import 'package:flutter/material.dart';
 import 'pages/splash_page.dart';
 import 'pages/login.dart';
@@ -6,7 +6,9 @@ import 'pages/register_page.dart';
 import 'pages/user_choice_page.dart';
 import 'pages/materi_user.dart';
 import 'pages/soal_user.dart';
+import 'pages/user_profile.dart';
 import 'widget/tabBar.dart';
+import 'widget/tabbar_user.dart';
 import 'pages/kuis_user.dart';
 import 'pages/kuis/detail_kuis_user.dart';
 import 'pages/kuis/mengerjakan_kuis.dart';
@@ -36,6 +38,8 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterPage(),
         '/user-choice': (context) => const UserChoicePage(),
         '/admin-dashboard': (context) => const MainScreen(),
+        '/user-dashboard': (context) => const MainScreenUser(),
+        // '/user-profile': (context) => const UserProfilePage(),
         '/materi-user': (context) => const MateriUser(),
         '/kuis-user': (context) => const KuisUser(),
       },
